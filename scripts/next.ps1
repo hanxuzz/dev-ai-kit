@@ -253,8 +253,14 @@ $mark = {
   if ($done) { return "已完成  $name" }
   return "未开始  $name"
 }
+$specReady = $false
+if ($hasRequirement) {
+  $reqBody = [System.IO.File]::ReadAllText($requirementPath)
+  $specReady = ($reqBody -match '范围内|In Scope|套件规格') -and ($reqBody -match '明确不做|不做|Out of Scope|非目标') -and ($reqBody -match '给定|验收|Given')
+}
 $currentNode = '接上材料'
-if ($hasTasks) { $currentNode = '按任务开发' }
+if ($hasRequirement -and -not $specReady) { $currentNode = '规格' }
+elseif ($hasTasks) { $currentNode = '按任务开发' }
 elseif ($hasPlanFile) { $currentNode = '任务清单' }
 elseif ($hasImpact) { $currentNode = '影响点' }
 elseif ($hasRequirement) { $currentNode = '规格' }
@@ -266,13 +272,19 @@ Write-Board @(
   (& $mark '接上材料' (Test-Path -LiteralPath $statusPath) $currentNode),
   (& $mark '会议或跳过' ($skipMeeting -or (Test-Path -LiteralPath (Join-Path $dir '01-meeting.md'))) $currentNode),
   (& $mark '外部资料或跳过' ($skipSources -or (Test-Path -LiteralPath (Join-Path $dir '02-sources.md'))) $currentNode),
-  (& $mark '规格' $hasRequirement $currentNode),
+  (& $mark '规格' $specReady $currentNode),
   (& $mark '影响点' $hasImpact $currentNode),
   (& $mark '任务清单' $hasTasks $currentNode),
   (& $mark '按任务开发' $false $currentNode),
   '未开始  用例',
   '未开始  收工'
 )
+
+if ($hasRequirement -and -not $specReady) {
+    Progress '规格还不能直接拿去开发（缺范围内、明确不做或可判断的验收）'
+    AgentStep '本轮按 flow-impact 把规格补成标准结构。已有 Spec 不要改原文，在文末追加「套件规格」：现状、范围内的 R（每条一个「给定 / 当 / 则」）、明确不做、异常。写不出「则」的放进问题并停下。不要改代码。做完再跑 next.ps1。回复先说套件进度，再列出补上的 R 和明确不做，问用户有没有漏。'
+    exit 0
+}
 
 if ((Test-Path -LiteralPath $requirementPath) -and -not $skipMeeting -and -not (Test-Path -LiteralPath (Join-Path $dir '01-meeting.md'))) {
   Progress '已有规格，跳过空的会议纪要和资料摘录'
@@ -322,6 +334,23 @@ if ($project.conventions -and $project.conventions.branch) {
 }
 Emit '套件进度：按任务改代码'
 Emit '还差：开发顺序里还有没勾上的步骤。'
+Emit '开发进度：'
+$seenOpen = $false
+foreach ($line in ($planText -split "`n")) {
+  $trim = $line.Trim()
+  if ($trim -notmatch '^- \[[ xX]\]') { continue }
+  if ($trim -match '^- \[[ xX]\]') {
+    if ($trim -match '^- \[ \]') {
+      if (-not $seenOpen) {
+        Emit "$trim    ← 当前这一条"
+        $seenOpen = $true
+      }
+      else { Emit $trim }
+    }
+    else { Emit $trim }
+  }
+}
+Emit '改完这一条再回复时，按 flow-implement 的「这一步怎么回复」写全六块：做的是哪一条、改了哪一块、是否落在影响点里、需求有没有漏、是否按开发计划、这次改动的影响。不要只写一句做完了。'
 if ($branchOn -eq 'true') {
   $pattern = 'feature/{id}'
   if ($project.conventions.branch.pattern) { $pattern = [string]$project.conventions.branch.pattern }

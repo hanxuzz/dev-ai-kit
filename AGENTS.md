@@ -16,7 +16,7 @@
 
 写需求文件之前运行 `<kit.path>/scripts/validate.ps1 -Workspace <工作区>`。失败就停，把 `FAIL` 那一行告诉用户。
 
-用户不知道下一步，或本阶段做完时，运行 `<kit.path>/scripts/next.ps1 -Workspace <工作区>`，并运行 `<kit.path>/scripts/check.ps1`。每次回复都要有「套件进度」「技能安装」「请你确认」「请你做」「下一步」。`下一步由你来做` 要在本轮执行。改界面或交互前必须打开需求原件（Figma、截图、原型图），不能只按整理后的摘要开发。
+用户不知道下一步，或本阶段做完时，运行 `<kit.path>/scripts/next.ps1 -Workspace <工作区>`，并运行 `<kit.path>/scripts/check.ps1`。每次回复都要有「套件进度」「技能安装」「请你确认」「请你做」「下一步」。`下一步由你来做` 要在本轮执行。改界面或交互前必须打开需求原件（Figma、截图、原型图），不能只按整理后的摘要开发。按任务改代码时，回复按 `skills/flow-implement/SKILL.md` 写全六块，并列出计划里每条任务的完成情况，不要收成一句做完了。
 
 ## 什么时候用套件
 

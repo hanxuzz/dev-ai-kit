@@ -11,11 +11,11 @@ alwaysApply: true
 
 `conventions.branch.enabled` 默认是 `false`。不要因为远程默认分支显示 `main` 就建 `feature/{id}`。仓库已有分支做法时按仓库做。已有 Spec 和计划不要改名，写进该需求 `status.yaml` 的 `files.requirement`、`files.impact`、`files.plan`。`runtime` 为空时不启动服务、不连库。
 
-用户问下一步，或一个阶段做完时，先运行 `scripts/next.ps1` 和 `scripts/check.ps1`。每次回复都先列出套件输出的「步骤」（已完成、进行中、未开始），再写明套件进度、技能安装是否通过、请你确认什么、请你做什么，并以单独一行「下一步」写出当前这一件动作。没有要确认或要做的，写「无」。
+用户问下一步，或一个阶段做完时，先运行 `scripts/next.ps1` 和 `scripts/check.ps1`。每次回复都先列出套件输出的「步骤」（已完成、进行中、未开始）。开发阶段还要列出「开发进度」里的每一条任务。本轮改过业务代码时，回复必须写全：做的是计划里哪一条、改了哪些文件、是否落在影响点里、需求有没有漏、是否按开发计划、这次改动影响到哪里。然后再写明套件进度、技能安装是否通过、请你确认什么、请你做什么，并以单独一行「下一步」写出当前这一件动作。没有要确认或要做的，写「无」。不要把开发过程收成一句「已完成」。
 
 开始写需求文件或改业务代码之前，运行 `kit.path` 下的 `scripts/validate.ps1`。失败就停。技能正文在 `kit.path` 下的 `skills/`。文档冲突时以 `kit.path` 下的 `docs/trust.md` 为准。用户说「做第 N 步」时读 `skills/flow-implement/SKILL.md`，并遵守 `docs/code-style.md`。代码仓已有规范时以代码仓为准。改界面、文案、字段或交互时，先打开需求里的 Figma、截图或原型图，对照原件改。找不到原件就停，不要只按整理后的摘要开发。
 
-用户提到密码、密钥、连接串时读 `skills/flow-bitwarden/SKILL.md`。只把 Bitwarden 的文件夹和条目名写入文件，不写口令，不把主密码要到对话里。
+用户提到密码、密钥、连接串，或打开站点时遇到登录页，读 `skills/flow-bitwarden/SKILL.md`。先用已解锁的 Bitwarden 按站点地址找条目并登录。条目没有、需要验证码或动态码、或填完仍进不去时，停下来让用户接手。只把 Bitwarden 的文件夹和条目名写入文件，不写口令，不把主密码要到对话里。
 
 `questions: open` 时，`stage` 必须是 `questions`。禁止创建 `04-requirement.md`、`05-impact.md`、`06-plan.md`，禁止修改前后端业务代码。
 
