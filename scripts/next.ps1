@@ -22,6 +22,10 @@ function Progress([string]$Text) {
 function Ask([string]$Text) {
   Emit "下一步请用户定：$Text"
 }
+function Write-Board([string[]]$Lines) {
+  Emit '步骤：'
+  foreach ($line in $Lines) { Emit "- $line" }
+}
 function Save-Next {
   try {
     if (-not $Workspace -or -not (Test-Path -LiteralPath $Workspace)) { return }
@@ -78,6 +82,19 @@ $convText = ''
 if (Test-Path -LiteralPath $conv) { $convText = [System.IO.File]::ReadAllText($conv) }
 $convCollected = $convText -match '收集日期：\s*\S'
 if ($confirmed -ne 'true') {
+  Write-Board @(
+    '进行中  确认规范',
+    '未开始  项目背景',
+    '未开始  接上材料',
+    '未开始  会议或跳过',
+    '未开始  外部资料或跳过',
+    '未开始  规格',
+    '未开始  影响点',
+    '未开始  任务清单',
+    '未开始  按任务开发',
+    '未开始  用例',
+    '未开始  收工'
+  )
   if (-not $convCollected) {
     Emit '还差：还没有把项目已有规范收集并问过用户。'
     Progress '确认项目规范（安装后的第 1 步）'
@@ -223,6 +240,39 @@ $requirementPath = Join-Path $dir $requirementName
 $impactPath = Join-Path $dir $impactName
 $planPath = Join-Path $dir $planName
 $impactIsAlias = ($impactName -eq $requirementName) -or ($impactName -eq $planName)
+$hasRequirement = Test-Path -LiteralPath $requirementPath
+$hasImpact = (Test-Path -LiteralPath $impactPath) -and -not $impactIsAlias
+$hasPlanFile = Test-Path -LiteralPath $planPath
+$hasTasks = $false
+if ($hasPlanFile) {
+  $hasTasks = [System.IO.File]::ReadAllText($planPath) -match '(?m)^- \[ \]'
+}
+$mark = {
+  param($name, $done, $currentName)
+  if ($name -eq $currentName) { return "进行中  $name" }
+  if ($done) { return "已完成  $name" }
+  return "未开始  $name"
+}
+$currentNode = '接上材料'
+if ($hasTasks) { $currentNode = '按任务开发' }
+elseif ($hasPlanFile) { $currentNode = '任务清单' }
+elseif ($hasImpact) { $currentNode = '影响点' }
+elseif ($hasRequirement) { $currentNode = '规格' }
+$bgLine = '可稍后  项目背景'
+if ($bgText -and $bgText -notmatch '未确认') { $bgLine = '已完成  项目背景' }
+Write-Board @(
+  '已完成  确认规范',
+  $bgLine,
+  (& $mark '接上材料' (Test-Path -LiteralPath $statusPath) $currentNode),
+  (& $mark '会议或跳过' ($skipMeeting -or (Test-Path -LiteralPath (Join-Path $dir '01-meeting.md'))) $currentNode),
+  (& $mark '外部资料或跳过' ($skipSources -or (Test-Path -LiteralPath (Join-Path $dir '02-sources.md'))) $currentNode),
+  (& $mark '规格' $hasRequirement $currentNode),
+  (& $mark '影响点' $hasImpact $currentNode),
+  (& $mark '任务清单' $hasTasks $currentNode),
+  (& $mark '按任务开发' $false $currentNode),
+  '未开始  用例',
+  '未开始  收工'
+)
 
 if ((Test-Path -LiteralPath $requirementPath) -and -not $skipMeeting -and -not (Test-Path -LiteralPath (Join-Path $dir '01-meeting.md'))) {
   Progress '已有规格，跳过空的会议纪要和资料摘录'

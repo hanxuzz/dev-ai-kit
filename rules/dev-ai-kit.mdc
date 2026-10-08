@@ -11,7 +11,7 @@ alwaysApply: true
 
 `conventions.branch.enabled` 默认是 `false`。不要因为远程默认分支显示 `main` 就建 `feature/{id}`。仓库已有分支做法时按仓库做。已有 Spec 和计划不要改名，写进该需求 `status.yaml` 的 `files.requirement`、`files.impact`、`files.plan`。`runtime` 为空时不启动服务、不连库。
 
-用户问下一步，或一个阶段做完时，先运行 `scripts/next.ps1` 和 `scripts/check.ps1`。每次回复都写明套件进度、技能安装是否通过、请你确认什么、请你做什么，并以单独一行「下一步」写出当前这一件动作。没有要确认或要做的，写「无」。
+用户问下一步，或一个阶段做完时，先运行 `scripts/next.ps1` 和 `scripts/check.ps1`。每次回复都先列出套件输出的「步骤」（已完成、进行中、未开始），再写明套件进度、技能安装是否通过、请你确认什么、请你做什么，并以单独一行「下一步」写出当前这一件动作。没有要确认或要做的，写「无」。
 
 开始写需求文件或改业务代码之前，运行 `kit.path` 下的 `scripts/validate.ps1`。失败就停。技能正文在 `kit.path` 下的 `skills/`。文档冲突时以 `kit.path` 下的 `docs/trust.md` 为准。用户说「做第 N 步」时读 `skills/flow-implement/SKILL.md`，并遵守 `docs/code-style.md`。代码仓已有规范时以代码仓为准。改界面、文案、字段或交互时，先打开需求里的 Figma、截图或原型图，对照原件改。找不到原件就停，不要只按整理后的摘要开发。
 
