@@ -16,6 +16,9 @@ function Say([string]$Text) {
 function AgentStep([string]$Text) {
   Emit "下一步由你来做：$Text"
 }
+function Progress([string]$Text) {
+  Emit "套件进度：$Text"
+}
 function Ask([string]$Text) {
   Emit "下一步请用户定：$Text"
 }
@@ -77,11 +80,13 @@ $convCollected = $convText -match '收集日期：\s*\S'
 if ($confirmed -ne 'true') {
   if (-not $convCollected) {
     Emit '还差：还没有把项目已有规范收集并问过用户。'
-    AgentStep '现在就按 skills/flow-conventions/SKILL.md 收集 AGENTS.md 和规则，写入 team/conventions.md。然后用确认清单逐项问用户，把读到的原文附在问题里。不要让用户复述这句话，也不要提后面的需求。'
+    Progress '确认项目规范（安装后的第 1 步）'
+    AgentStep '现在就按 skills/flow-conventions/SKILL.md 收集 AGENTS.md 和规则，写入 team/conventions.md。然后用确认清单逐项问用户，把读到的原文附在问题里。回复第一句用上面的套件进度。不要让用户复述这句话，也不要提后面的需求。'
   }
   else {
     Emit '还差：项目规范已经收集，还没有问过用户。'
-    AgentStep '打开 team/conventions.md，按 skills/flow-conventions/SKILL.md 的确认清单逐项问用户。不要让用户复述这句话，也不要提后面的需求。'
+    Progress '确认项目规范（收集已经写好，还差你点头）'
+    AgentStep '打开 team/conventions.md，按 skills/flow-conventions/SKILL.md 的确认清单逐项问用户。回复第一句用上面的套件进度。不要让用户复述这句话，也不要提后面的需求。'
   }
   exit 0
 }
@@ -95,7 +100,7 @@ if (-not (Test-Path -LiteralPath $bg)) {
 }
 $bgText = [System.IO.File]::ReadAllText($bg)
 if ($bgText -match '未确认') {
-  $later.Add('项目背景文首仍是未确认。你看过 docs/team/background.md 后可以说：背景已确认。')
+  $later.Add('项目背景文首仍是未确认。这不挡住当前需求。起草时留空的点，用户看过可以说：背景已确认。')
 }
 
 $runtimeTest = ''
@@ -108,7 +113,7 @@ if ($project.runtime) {
   }
 }
 if (-not $runtimeTest -or -not $runtimeStart) {
-  $later.Add('启动命令或测试命令还是空的。要自测时再填 project.yaml 的 runtime，不要现在连数据库。')
+  $later.Add('启动命令或测试命令还是空的。这不挡住改代码。要自动跑用例时再填 project.yaml 的 runtime，不要现在连数据库。')
 }
 
 $reqRoot = Resolve-RequirementsRoot $docsRoot $project
@@ -189,7 +194,8 @@ if ($existingFiles.Count -gt 0 -and -not (Test-Path -LiteralPath (Join-Path $dir
   if (-not $mapped) {
     Emit '还差：这个需求目录里已有材料，还没对上套件要读的文件。'
     $existingFiles | Select-Object -First 8 | ForEach-Object { Emit "- $($_.Name)" }
-    AgentStep '不要改名，也不要新建空的 04、05、06。根据上面列出的文件拟定 files.requirement、files.impact、files.plan，先把对应关系列出来请用户确认，确认后再写入 status.yaml。'
+    Progress '接上已有材料（还没写成套件要的 status.yaml）'
+    AgentStep '本轮就写 status.yaml，不要先问用户怎么填。规格写入 files.requirement，名称里带计划或 Plan 的写入 files.plan，files.impact 留空。不要把规格填进 impact。写完再跑一次 next.ps1。回复第一句用上面的套件进度。'
     exit 0
   }
 }
@@ -204,44 +210,80 @@ $steps = @(
 )
 
 $reqStatus = Read-SimpleYaml (Join-Path $dir 'status.yaml')
+$skipMeeting = $false
+$skipSources = $false
+if ($reqStatus.skip) {
+  $skipMeeting = [string]$reqStatus.skip.meeting -eq 'skipped'
+  $skipSources = [string]$reqStatus.skip.sources -eq 'skipped'
+}
+$requirementName = Get-RoleFileName $reqStatus 'requirement' '04-requirement.md'
+$impactName = Get-RoleFileName $reqStatus 'impact' '05-impact.md'
+$planName = Get-RoleFileName $reqStatus 'plan' '06-plan.md'
+$requirementPath = Join-Path $dir $requirementName
+$impactPath = Join-Path $dir $impactName
+$planPath = Join-Path $dir $planName
+$impactIsAlias = ($impactName -eq $requirementName) -or ($impactName -eq $planName)
+
+if ((Test-Path -LiteralPath $requirementPath) -and -not $skipMeeting -and -not (Test-Path -LiteralPath (Join-Path $dir '01-meeting.md'))) {
+  Progress '已有规格，跳过空的会议纪要和资料摘录'
+  AgentStep '本轮就做：共享目录索引里没有这条需求的录像时，把 status.yaml 的 skip.meeting 和 skip.sources 写成 skipped。有录像或链接就先收那些。不要写空的 01、02。做完再跑 next.ps1。回复第一句用上面的套件进度。'
+  exit 0
+}
+
 foreach ($step in $steps) {
+  if ($step.File -eq '01-meeting.md' -and $skipMeeting) { continue }
+  if ($step.File -eq '02-sources.md' -and $skipSources) { continue }
   $fileName = $step.File
   if ($step.Role) { $fileName = Get-RoleFileName $reqStatus $step.Role $step.File }
+  if ($step.Role -eq 'impact' -and $impactIsAlias) {
+    Emit '还差：files.impact 指向的是规格或计划，不是对照代码后的影响点。'
+    Progress '对照代码整理影响点（规格还不能当成影响点）'
+    AgentStep '本轮就按 flow-impact 对照代码写 05-impact.md。每个修改点写仓库里真实存在的路径，新增的路径标明新增。写完把 files.impact 改成 05-impact.md。不要改规格和计划的原文。回复先说套件进度，再列出改哪些路径，问用户有没有指错。'
+    exit 0
+  }
   if (-not (Test-Path -LiteralPath (Join-Path $dir $fileName))) {
     Emit "还差：还没有 $fileName。"
-    if ($later.Count -gt 0) { Emit '还可以稍后做：'; $later | ForEach-Object { Emit "- $_" } }
+    if ($later.Count -gt 0) { Emit '不挡住当前需求，还可以稍后做：'; $later | ForEach-Object { Emit "- $_" } }
     AgentStep $step.Do
     exit 0
   }
 }
 
-$planName = Get-RoleFileName $reqStatus 'plan' '06-plan.md'
-$planPath = Join-Path $dir $planName
-$planText = [System.IO.File]::ReadAllText($planPath)
-if ($planText -match '(?m)^- \[ \]') {
-  if ($confirmed -ne 'true') {
-    Emit '还差：要改代码了，但分支和提交规范还没按这个仓库确认。'
-    AgentStep '现在就按 skills/flow-conventions/SKILL.md 收集并逐项问用户。不要让用户复述这句话，也不要改代码。'
-    exit 0
-  }
-  $branchOn = ''
-  if ($project.conventions -and $project.conventions.branch) {
-    $branchOn = [string]$project.conventions.branch.enabled
-  }
-  Emit '还差：开发顺序里还有没勾上的步骤。'
-  if ($branchOn -eq 'true') {
-    $pattern = 'feature/{id}'
-    if ($project.conventions.branch.pattern) { $pattern = [string]$project.conventions.branch.pattern }
-    $branch = $pattern.Replace('{id}', $current)
-    Emit "改代码前要先在对应仓库使用分支 $branch 。"
-    AgentStep "按 flow-implement 做计划里第一个还没勾上的任务。开始前先建好或切到分支 $branch ，只做这一步。做完把验证结果告诉用户，不要接着做下一步。"
-  }
-  else {
-    Emit '这个项目已关掉自动建分支，停在当前分支上改。'
-    AgentStep '按 flow-implement 做计划里第一个还没勾上的任务。不要新建分支。只做这一步，做完把验证结果告诉用户。'
-  }
+if (-not (Test-Path -LiteralPath $planPath)) {
+  Emit "还差：还没有 $planName。"
+  AgentStep '按 flow-plan 写开发顺序。不要改代码。'
   exit 0
 }
+$planText = [System.IO.File]::ReadAllText($planPath)
+if ($planText -notmatch '(?m)^- \[ \]') {
+  Emit '还差：计划是叙述，没有未完成的 - [ ]，还不能据此改代码。'
+  Progress '把现有计划整理成可执行任务（还不能改代码）'
+  AgentStep '本轮就通读现有计划，抽出可执行步骤，追加到该文件末尾，标题用「套件任务」，每行一条 - [ ]。不要改原有叙述，不要改代码。回复先说套件进度，再把追加的任务列出来，问用户有没有漏。'
+  exit 0
+}
+if ($confirmed -ne 'true') {
+  Emit '还差：要改代码了，但分支和提交规范还没按这个仓库确认。'
+  AgentStep '现在就按 skills/flow-conventions/SKILL.md 收集并逐项问用户。不要让用户复述这句话，也不要改代码。'
+  exit 0
+}
+$branchOn = ''
+if ($project.conventions -and $project.conventions.branch) {
+  $branchOn = [string]$project.conventions.branch.enabled
+}
+Emit '套件进度：按任务改代码'
+Emit '还差：开发顺序里还有没勾上的步骤。'
+if ($branchOn -eq 'true') {
+  $pattern = 'feature/{id}'
+  if ($project.conventions.branch.pattern) { $pattern = [string]$project.conventions.branch.pattern }
+  $branch = $pattern.Replace('{id}', $current)
+  Emit "改代码前要先在对应仓库使用分支 $branch 。"
+  AgentStep "按 flow-implement 做计划里第一个还没勾上的任务。开始前先建好或切到分支 $branch ，只做这一步。做完把验证结果告诉用户，不要接着做下一步。"
+}
+else {
+  Emit '这个项目已关掉自动建分支，停在当前分支上改。'
+  AgentStep '按 flow-implement 做计划里第一个还没勾上的任务。不要新建分支。只做这一步，做完把验证结果告诉用户。'
+}
+exit 0
 
 $casePath = Join-Path $dir '07-testcases.md'
 $caseText = [System.IO.File]::ReadAllText($casePath)

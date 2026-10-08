@@ -3,8 +3,11 @@ title: ""
 stage: intake
 questions: none
 blocker: ""
-# 已有 Spec / 计划不必改名。空着就用 04-requirement.md、05-impact.md、06-plan.md。
+# 已有 Spec / 计划不必改名。影响点不要指向规格或计划，对照代码后再写 05-impact.md。
 files:
   requirement: ""
   impact: ""
   plan: ""
+skip:
+  meeting: ""
+  sources: ""

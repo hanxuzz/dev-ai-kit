@@ -8,7 +8,9 @@ description: >-
 
 按 `docs/runtime.md` 做开始检查，并读 `docs/trust.md`。`questions` 为 `open` 时停止，不要创建 `06-plan.md`。
 
-需求正文和影响点先看 `status.yaml` 的 `files.requirement`、`files.impact`。这两项为空才看 `04-requirement.md`、`05-impact.md`。指向的文件不存在，或正文过短、仍是空模板时，停止。不要凭会议记录补任务，也不要另建一份空的 `06` 盖住已有计划。`files.plan` 已指向一份现有计划时，补进那份文件，不要再复制模板。
+需求正文先看 `status.yaml` 的 `files.requirement`，为空才看 `04-requirement.md`。影响点只看 `05-impact.md`，或一份明确不是规格、不是计划的 `files.impact`。没有影响点时，先按 `flow-impact` 对照代码写 `05-impact.md`，不要把规格当成影响点。
+
+已有计划若是按天叙述、没有 `- [ ]`：保留原文，在文末追加「套件任务」，每行一条 `- [ ]`。先把拟好的任务列给用户，用户点头后再写入。确认前不要改代码。`files.plan` 已指向这份文件时，不要再复制一份空的 `06`。
 
 从模板写 `06-plan.md`。对照 `docs/practices.md`：有 `R` 写不出「则」，或 `questions` 仍是 `open`，就不要创建这份文件。
 

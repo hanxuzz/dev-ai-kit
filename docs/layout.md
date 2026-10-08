@@ -54,7 +54,9 @@ files:
   plan: ""
 ```
 
-`files` 里某项非空时，那一项指向本目录已有文件，不要再复制一份空的 `04` / `05` / `06`。三项都空时，才用 `04-requirement.md`、`05-impact.md`、`06-plan.md`。校验和「按计划改代码」认这个指向。
+`files.requirement` 指向已有规格，`files.plan` 指向已有计划。`files.impact` 不要指向这两份。影响点是对照代码之后的修改和新增路径，写在 `05-impact.md`。
+
+`skip.meeting` 或 `skip.sources` 为 `skipped` 时，没有录像、没有外部链接也不补空的 `01`、`02`。已有规格时可以跳过。
 
 `stage` 只用：`intake`、`meeting`、`sources`、`questions`、`requirement`、`impact`、`plan`、`build`、`test`、`done`。
 
