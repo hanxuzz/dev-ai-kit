@@ -29,6 +29,7 @@
 用户确认后：
 
 - 已经收集到分支做法时，`branch.enabled` 保持 `false`。例如从 `prod` 开 `feature/NBPEM-xxx`，再 cherry-pick，并且不代 push。
-- `confirmed: true` 只表示这份收集已经确认，套件仍然按 `team/conventions.md` 执行，不另建分支。
+- 用户补充的新规矩写进 `team/conventions.md`，不改仓库原文。和原文冲突时，两份都留着，并注明以用户这次说的为准。
+- `confirmed: true` 只表示这份收集和补充已经确认。套件按 `team/conventions.md` 执行，不另建分支。
 
-还没确认时，可以起草背景、接上已有需求、整理材料。不要建分支，不要改业务代码。
+安装之后先做这件事，再起草背景和整理需求。还没确认时，不要建分支，不要改业务代码。

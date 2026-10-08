@@ -53,13 +53,17 @@ macOS / Linux 用 `scripts/install.sh`，参数相同。
 
 脚本失败就停，把 `FAIL` 那一行告诉用户。不要手工改出一套平行配置。脚本不会覆盖已有的 `project.yaml`、`project.local.yaml` 和改过的规则。
 
-## 5. 起草项目背景
+## 5. 收集规范并请用户确认
+
+这一步在起草背景之前做，也是安装后要对用户说的第一件事。
+
+按 `skills/flow-conventions/SKILL.md` 收集，写入文档根 `team/conventions.md`。在对话里用几句话念出来：分支怎么开、提交和推送有什么限制、来自哪个文件。没有找到就说明将使用套件默认，并同样请用户确认。
+
+用户没说「规范已确认」之前，不要把 `confirmed` 写成 `true`。用户要改或补充时，按该技能的「用户补充」更新 `team/conventions.md` 和 `project.yaml` 的开关，不要改仓库里的 `AGENTS.md` 或 `.cursor/rules`。
+
+## 6. 起草项目背景
 
 安装只复制空模板。接着读前后端 README 和一级目录，补全文档根 `team/background.md` 和 `team/map.md`。保留文首的「未确认」。看不懂的章节留空并列出要用户补的点。已经没有「未确认」的背景文件不要整篇重写。`runtime` 留空。不要发明启动命令。
-
-## 6. 确认规范
-
-`project.yaml` 里的 `conventions` 此时只是建议，`confirmed` 仍是 `false`。按 `skills/flow-conventions/SKILL.md` 看各仓库当前分支和已有的 `AGENTS.md`，请用户逐项打开或关掉。仓库已有分支规则时，建议关掉套件的自动建分支。用户没确认前，不要把 `confirmed` 写成 `true`。确认前可以整理已有材料，不要建分支，不要改业务代码。
 
 ## 7. 检查依赖
 
@@ -69,6 +73,7 @@ macOS / Linux 用 `scripts/install.sh`，参数相同。
 
 向用户说明：
 
+- 收集到的规范是什么，请用户确认或补充。没确认之前不要改业务代码
 - 文档现在是哪一档
 - 原件以后放到共享目录的 `requirements/<需求号>/`，并写进 `index.md`
 - 目录和状态看 `docs/layout.md`，日常说法看 `MANUAL.md`

@@ -35,7 +35,9 @@ git -C <目录> symbolic-ref --short refs/remotes/origin/HEAD
 
 ## 开关怎么填
 
-先把收集结果告诉用户。用户明确同意后，才改 `project.yaml` 的 `conventions`：
+先把收集结果告诉用户，请用户确认或补充。这是安装之后的第一件事，先于项目背景和具体需求。用户没说「规范已确认」之前，不要把 `confirmed` 写成 `true`，也不要建分支、不要改业务代码。
+
+用户明确同意后，才改 `project.yaml` 的 `conventions`：
 
 - 收集里已经有分支做法：`branch.enabled` 写成 `false`，`branch.base` 留空。开发、提交、推送按 `team/conventions.md` 和仓库原文。
 - 只有用户明确说「项目没有分支规范，由套件从某条主干建分支」时，才把 `branch.enabled` 写成 `true`，`branch.base` 用用户说的那条。
@@ -43,3 +45,13 @@ git -C <目录> symbolic-ref --short refs/remotes/origin/HEAD
 - `confirmed` 写成 `true`，表示收集结果已经确认。这不表示套件开始建分支。
 
 不要替用户把 `confirmed` 写成 `true`。确认后跑 `scripts/next.ps1`，把下一句告诉用户。
+
+## 用户补充
+
+用户提出新的规矩，或要改掉收集到的某一条时：
+
+1. 写进 `team/conventions.md`，不要改仓库里的 `AGENTS.md`、`README`、`.cursor/rules`。
+2. 在「来源」表加一行：仓库写「用户」，文件写「对话」，管什么写这一条。
+3. 按内容补进「分支」「提交」或「套件不要覆盖的红线」。和已收集的原文冲突时，两句都留着，并写明以用户这次说的为准。
+4. 同步 `project.yaml` 的开关，且不得松于套件硬限制：不 force push，不改 git config，不跳过钩子，口令不进文件。用户没要求套件建分支时，`branch.enabled` 保持 `false`。
+5. 改完把更新后的那几句念给用户。用户再说「规范已确认」后，才把 `confirmed` 写成 `true`。

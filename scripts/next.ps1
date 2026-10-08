@@ -64,10 +64,23 @@ if (-not $docsRoot -or -not (Test-Path -LiteralPath $docsRoot)) {
 }
 $docsRoot = (Resolve-Path -LiteralPath $docsRoot).Path
 
-$later = New-Object System.Collections.Generic.List[string]
+$conv = Join-Path $docsRoot 'team\conventions.md'
+$convText = ''
+if (Test-Path -LiteralPath $conv) { $convText = [System.IO.File]::ReadAllText($conv) }
+$convCollected = $convText -match '收集日期：\s*\S'
 if ($confirmed -ne 'true') {
-  $later.Add('分支和提交规范还没确认。整理材料和接上已有需求可以先做。改代码或建分支之前要先确认。')
+  if (-not $convCollected) {
+    Emit '还差：还没有把项目已有规范收集给你确认。'
+    Say '先收集各代码仓已有的 AGENTS.md 和规则，整理进 team/conventions.md，然后念给我确认。我要改或补充的，按这份整理更新，不要改仓库原文。'
+  }
+  else {
+    Emit '还差：项目规范已经收集，还没有经过你确认。'
+    Say '规范就按 team/conventions.md 这份。没问题就说：规范已确认。要改或补充直接说，我按套件的整理格式更新。'
+  }
+  exit 0
 }
+
+$later = New-Object System.Collections.Generic.List[string]
 $bg = Join-Path $docsRoot 'team\background.md'
 if (-not (Test-Path -LiteralPath $bg)) {
   Emit '还差：还没有项目背景。'
