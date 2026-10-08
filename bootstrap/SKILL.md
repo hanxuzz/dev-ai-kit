@@ -57,9 +57,9 @@ macOS / Linux 用 `scripts/install.sh`，参数相同。
 
 这一步在起草背景之前做，也是安装后要对用户说的第一件事。
 
-按 `skills/flow-conventions/SKILL.md` 收集，写入文档根 `team/conventions.md`。在对话里用几句话念出来：分支怎么开、提交和推送有什么限制、来自哪个文件。没有找到就说明将使用套件默认，并同样请用户确认。
+按 `skills/flow-conventions/SKILL.md` 在本轮收集，写入文档根 `team/conventions.md`，然后用确认清单问用户。不要把「请收集规范」这句话交给用户去发。
 
-用户没说「规范已确认」之前，不要把 `confirmed` 写成 `true`。用户要改或补充时，按该技能的「用户补充」更新 `team/conventions.md` 和 `project.yaml` 的开关，不要改仓库里的 `AGENTS.md` 或 `.cursor/rules`。
+用户没说「规范已确认」之前，不要把 `confirmed` 写成 `true`。用户要改或补充时，按该技能的「用户补充」更新 `team/conventions.md` 和 `project.yaml` 的开关，不要改仓库里的 `AGENTS.md` 或 `.cursor/rules`。问完清单就停，不要接着做背景或某条需求。
 
 ## 6. 起草项目背景
 

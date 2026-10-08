@@ -13,6 +13,9 @@ function Emit([string]$Text) {
 function Say([string]$Text) {
   Emit "下一步就做这一句：$Text"
 }
+function Do([string]$Text) {
+  Emit "下一步由你来做：$Text"
+}
 function Save-Next {
   try {
     if (-not $Workspace -or -not (Test-Path -LiteralPath $Workspace)) { return }
@@ -70,12 +73,12 @@ if (Test-Path -LiteralPath $conv) { $convText = [System.IO.File]::ReadAllText($c
 $convCollected = $convText -match '收集日期：\s*\S'
 if ($confirmed -ne 'true') {
   if (-not $convCollected) {
-    Emit '还差：还没有把项目已有规范收集给你确认。'
-    Say '先收集各代码仓已有的 AGENTS.md 和规则，整理进 team/conventions.md，然后念给我确认。我要改或补充的，按这份整理更新，不要改仓库原文。'
+    Emit '还差：还没有把项目已有规范收集并问过用户。'
+    Do '现在就按 skills/flow-conventions/SKILL.md 收集 AGENTS.md 和规则，写入 team/conventions.md。然后用确认清单逐项问用户，把读到的原文附在问题里。不要让用户复述这句话，也不要提后面的需求。'
   }
   else {
-    Emit '还差：项目规范已经收集，还没有经过你确认。'
-    Say '规范就按 team/conventions.md 这份。没问题就说：规范已确认。要改或补充直接说，我按套件的整理格式更新。'
+    Emit '还差：项目规范已经收集，还没有问过用户。'
+    Do '打开 team/conventions.md，按 skills/flow-conventions/SKILL.md 的确认清单逐项问用户。不要让用户复述这句话，也不要提后面的需求。'
   }
   exit 0
 }
