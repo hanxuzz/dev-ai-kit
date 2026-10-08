@@ -13,8 +13,11 @@ function Emit([string]$Text) {
 function Say([string]$Text) {
   Emit "下一步就做这一句：$Text"
 }
-function Do([string]$Text) {
+function AgentStep([string]$Text) {
   Emit "下一步由你来做：$Text"
+}
+function Ask([string]$Text) {
+  Emit "下一步请用户定：$Text"
 }
 function Save-Next {
   try {
@@ -32,7 +35,7 @@ $OutputEncoding = New-Object System.Text.UTF8Encoding $false
 
 try {
 if (-not (Test-Path -LiteralPath $Workspace)) {
-  Say '先告诉我业务项目文件夹在哪。Cursor 要打开包着前端和后端的那一层，不是套件仓库。'
+  Ask '业务项目文件夹在哪？要打开包着前端和后端的那一层，不是套件仓库。'
   exit 0
 }
 $Workspace = (Resolve-Path -LiteralPath $Workspace).Path
@@ -43,7 +46,7 @@ Emit "工作区：$Workspace"
 
 if (-not (Test-Path -LiteralPath $projectFile)) {
   Emit '还差：还没安装。不需要复制 skill.md。'
-  Say '请用 https://github.com/hanxuzz/dev-ai-kit 安装到当前项目。克隆到当前文件夹外面，阅读 bootstrap/SKILL.md 并按它执行。不要改业务代码。'
+  AgentStep '用 https://github.com/hanxuzz/dev-ai-kit 安装到当前项目。克隆到当前文件夹外面，阅读 bootstrap/SKILL.md 并执行。不要改业务代码，也不要让用户把这句话发回来。'
   exit 0
 }
 
@@ -55,14 +58,14 @@ $local = $null
 if (Test-Path -LiteralPath $localFile) { $local = Read-SimpleYaml $localFile }
 else {
   Emit '还差：没有 project.local.yaml。'
-  Say '请再用 https://github.com/hanxuzz/dev-ai-kit 安装一次，补上 project.local.yaml。不要改业务代码。'
+  AgentStep '再按 bootstrap/SKILL.md 安装一次，补上 project.local.yaml。不要改业务代码，不要让用户复述这句话。'
   exit 0
 }
 
 $docsRoot = Resolve-DocsRoot $Workspace $project $local
 if (-not $docsRoot -or -not (Test-Path -LiteralPath $docsRoot)) {
   Emit '还差：文档目录不存在，或共享目录路径是空的。'
-  Say '文档准备放哪：文档库、OneDrive 共享目录，还是项目里的 docs 并且不提交？'
+  Ask '文档准备放哪：已有的文档库、OneDrive 共享目录，还是项目里的 docs 并且不提交？'
   exit 0
 }
 $docsRoot = (Resolve-Path -LiteralPath $docsRoot).Path
@@ -74,11 +77,11 @@ $convCollected = $convText -match '收集日期：\s*\S'
 if ($confirmed -ne 'true') {
   if (-not $convCollected) {
     Emit '还差：还没有把项目已有规范收集并问过用户。'
-    Do '现在就按 skills/flow-conventions/SKILL.md 收集 AGENTS.md 和规则，写入 team/conventions.md。然后用确认清单逐项问用户，把读到的原文附在问题里。不要让用户复述这句话，也不要提后面的需求。'
+    AgentStep '现在就按 skills/flow-conventions/SKILL.md 收集 AGENTS.md 和规则，写入 team/conventions.md。然后用确认清单逐项问用户，把读到的原文附在问题里。不要让用户复述这句话，也不要提后面的需求。'
   }
   else {
     Emit '还差：项目规范已经收集，还没有问过用户。'
-    Do '打开 team/conventions.md，按 skills/flow-conventions/SKILL.md 的确认清单逐项问用户。不要让用户复述这句话，也不要提后面的需求。'
+    AgentStep '打开 team/conventions.md，按 skills/flow-conventions/SKILL.md 的确认清单逐项问用户。不要让用户复述这句话，也不要提后面的需求。'
   }
   exit 0
 }
@@ -87,7 +90,7 @@ $later = New-Object System.Collections.Generic.List[string]
 $bg = Join-Path $docsRoot 'team\background.md'
 if (-not (Test-Path -LiteralPath $bg)) {
   Emit '还差：还没有项目背景。'
-  Say '根据当前前后端，起草项目背景。看不懂的地方留空，文首保持未确认。'
+  AgentStep '根据当前前后端起草 team/background.md 和 team/map.md。看不懂的留空，文首保持未确认。起草完只把留空的点问用户，不要让用户发口令句。'
   exit 0
 }
 $bgText = [System.IO.File]::ReadAllText($bg)
@@ -111,7 +114,7 @@ if (-not $runtimeTest -or -not $runtimeStart) {
 $reqRoot = Resolve-RequirementsRoot $docsRoot $project
 if (-not $reqRoot) {
   Emit '还差：requirements_dir 不是一个目录名。'
-  Say '把 project.yaml 里的 docs.requirements_dir 改成 requirement 或 requirements，不要写路径。'
+  AgentStep '看文档根下已经有的目录。只有 requirement 或只有 requirements 时，把 docs.requirements_dir 写成那个名字。两个都有再问用户留哪一个。不要写路径。'
   exit 0
 }
 $dirs = @()
@@ -124,28 +127,33 @@ if ($local.current) { $current = [string]$local.current }
 if (-not $current -and $dirs.Count -gt 0) {
   Emit '已经有需求目录，不要另起一套空目录。'
   $dirs | ForEach-Object { Emit "- $($_.Name)" }
-  Say '接上已有需求，告诉我需求号。不要新建目录，也不要覆盖里面的文件。'
+  if ($dirs.Count -eq 1) {
+    AgentStep "把 project.local.yaml 的 current 写成 $($dirs[0].Name)，不要新建目录，不要覆盖文件。写完再跑一次 next.ps1。"
+  }
+  else {
+    Ask '上面有多条需求。当前做哪一条？告诉我需求号。'
+  }
   exit 0
 }
 if ($dirs.Count -eq 0 -or -not $current) {
   Emit '已经有：安装配置和项目背景。'
   Emit '还差：还没有一条正在做的需求。'
   if ($later.Count -gt 0) { Emit '还可以稍后做：'; $later | ForEach-Object { Emit "- $_" } }
-  Say '新建需求。没有工单号就用 REQ-今天日期-英文短名，并告诉我标题。'
+  Ask '还没有正在做的需求。标题是什么？有工单号用工单号，没有就用一句英文短名。'
   exit 0
 }
 
 $dir = Join-Path $reqRoot $current
 if (-not (Test-Path -LiteralPath $dir)) {
   Emit "还差：当前需求号 $current 没有对应文件夹。"
-  Say "新建需求 $current。"
+  AgentStep "当前需求号 $current 没有文件夹。按 flow-intake 只建这个目录和 status.yaml，不要覆盖别的需求，也不要预告后面的步骤。"
   exit 0
 }
 
 $statusPath = Join-Path $dir 'status.yaml'
 if (-not (Test-Path -LiteralPath $statusPath)) {
   Emit "还差：$current 没有 status.yaml。"
-  Say "按 flow-intake 只补 $current 的 status.yaml，不要创建后面的空文件。"
+  AgentStep "按 flow-intake 只补 $current 的 status.yaml，不要创建后面的空文件。补完再跑 next.ps1。"
   exit 0
 }
 $status = Read-SimpleYaml $statusPath
@@ -156,14 +164,14 @@ Emit "阶段：$($status.stage)    问题：$questions"
 
 if ($blocker) {
   Emit "还差：被挡住了。$blocker"
-  Say "先处理这件事：$blocker 处理完再告诉我继续。"
+  AgentStep "处理 blocker：$blocker 。缺的材料再问用户。不要让用户把这句话发回来。"
   exit 0
 }
 
 if ($questions -eq 'open') {
   Emit '还差：问题清单还没经需求方确认。现在不能写开发顺序，也不能改代码。'
   Emit "请把 $dir\03-questions.md 给需求方看。有共享目录时，同一份应在共享目录里。"
-  Say '需求方已确认。按确认结果更新需求和影响点。'
+  Ask '问题清单里还有未确认项。需求方的结论是什么？确认后我再更新需求和影响点。'
   exit 0
 }
 
@@ -181,18 +189,18 @@ if ($existingFiles.Count -gt 0 -and -not (Test-Path -LiteralPath (Join-Path $dir
   if (-not $mapped) {
     Emit '还差：这个需求目录里已有材料，还没对上套件要读的文件。'
     $existingFiles | Select-Object -First 8 | ForEach-Object { Emit "- $($_.Name)" }
-    Say '不要改名，也不要新建空的 04、05、06。在 status.yaml 里把已有 Spec 填到 files.requirement，把影响点填到 files.impact，把开发计划填到 files.plan。没有的那一项再写。链接摘录可以另收进 02-sources.md。'
+    AgentStep '不要改名，也不要新建空的 04、05、06。根据上面列出的文件拟定 files.requirement、files.impact、files.plan，先把对应关系列出来请用户确认，确认后再写入 status.yaml。'
     exit 0
   }
 }
 
 $steps = @(
-  @{ Role = ''; File = '01-meeting.md'; Say = '解析这个需求的录屏。没有录像就改说：先收资料，把链接发给我。' }
-  @{ Role = ''; File = '02-sources.md'; Say = '把需求方给的链接、Figma、Confluence 或 PDF 收进这个需求。没有材料就直接说：没有外部资料，对照代码整理需求。' }
-  @{ Role = 'requirement'; File = '04-requirement.md'; Say = '不要新建空的 04-requirement.md。若目录里已有 Spec，把它的文件名写入 status.yaml 的 files.requirement。还没有成文需求时，再对照现在的代码整理。有对不上的地方先写成问题，不要写开发顺序。' }
-  @{ Role = 'impact'; File = '05-impact.md'; Say = '不要新建空的 05-impact.md。若影响点已经写在现有文档里，把文件名写入 status.yaml 的 files.impact。还没有就对照现在的代码整理。有对不上的地方先写成问题，不要写开发顺序。' }
-  @{ Role = 'plan'; File = '06-plan.md'; Say = '不要新建空的 06-plan.md。若开发顺序已经写在现有计划里，把文件名写入 status.yaml 的 files.plan。还没有再写出开发顺序。' }
-  @{ Role = 'testcases'; File = '07-testcases.md'; Say = '整理测试用例。能自动跑的标 auto，不能跑的标 manual。每条需求都要有用例，或写明为什么不测。' }
+  @{ Role = ''; File = '01-meeting.md'; Do = '按 flow-meeting 在共享目录索引里找这条需求的录像并解析。索引里没有录像时，问用户录像路径，或问是否改为只收资料。' }
+  @{ Role = ''; File = '02-sources.md'; Do = '按 flow-sources 把已经给出的链接、Figma、Confluence 和 PDF 收成 02-sources.md。还没有任何材料时，问用户要链接或说明没有外部资料。' }
+  @{ Role = 'requirement'; File = '04-requirement.md'; Do = '按 flow-impact 对照代码整理需求。已有 Spec 就指向 files.requirement，不要新建空文件。发现冲突就写成问题并停下问用户。' }
+  @{ Role = 'impact'; File = '05-impact.md'; Do = '按 flow-impact 写影响点，或把已有影响点文件写入 files.impact。路径对不上就问用户，不要写开发顺序。' }
+  @{ Role = 'plan'; File = '06-plan.md'; Do = '按 flow-plan 写开发顺序，或把已有计划写入 files.plan。不要新建一份空的 06 盖住已有文件。写完停下，不要改代码。' }
+  @{ Role = 'testcases'; File = '07-testcases.md'; Do = '按 flow-test 整理用例。能对上已有测试命令的标 auto，其余标 manual。runtime 为空不要编造命令。' }
 )
 
 $reqStatus = Read-SimpleYaml (Join-Path $dir 'status.yaml')
@@ -202,7 +210,7 @@ foreach ($step in $steps) {
   if (-not (Test-Path -LiteralPath (Join-Path $dir $fileName))) {
     Emit "还差：还没有 $fileName。"
     if ($later.Count -gt 0) { Emit '还可以稍后做：'; $later | ForEach-Object { Emit "- $_" } }
-    Say $step.Say
+    AgentStep $step.Do
     exit 0
   }
 }
@@ -213,7 +221,7 @@ $planText = [System.IO.File]::ReadAllText($planPath)
 if ($planText -match '(?m)^- \[ \]') {
   if ($confirmed -ne 'true') {
     Emit '还差：要改代码了，但分支和提交规范还没按这个仓库确认。'
-    Say '先收集各代码仓已有的 AGENTS.md 和规则，整理进 team/conventions.md。项目已有的分支做法保持不动，不要建分支，也不要改代码。'
+    AgentStep '现在就按 skills/flow-conventions/SKILL.md 收集并逐项问用户。不要让用户复述这句话，也不要改代码。'
     exit 0
   }
   $branchOn = ''
@@ -226,11 +234,11 @@ if ($planText -match '(?m)^- \[ \]') {
     if ($project.conventions.branch.pattern) { $pattern = [string]$project.conventions.branch.pattern }
     $branch = $pattern.Replace('{id}', $current)
     Emit "改代码前要先在对应仓库使用分支 $branch 。"
-    Say "做计划里第一个还没勾上的任务。开始前先建好或切到分支 $branch ，只做这一步。"
+    AgentStep "按 flow-implement 做计划里第一个还没勾上的任务。开始前先建好或切到分支 $branch ，只做这一步。做完把验证结果告诉用户，不要接着做下一步。"
   }
   else {
     Emit '这个项目已关掉自动建分支，停在当前分支上改。'
-    Say '做计划里第一个还没勾上的任务。只做这一步。做完告诉我验证命令的结果。'
+    AgentStep '按 flow-implement 做计划里第一个还没勾上的任务。不要新建分支。只做这一步，做完把验证结果告诉用户。'
   }
   exit 0
 }
@@ -240,11 +248,11 @@ $caseText = [System.IO.File]::ReadAllText($casePath)
 if ($caseText -match '未执行') {
   if (-not $runtimeTest) {
     Emit '还差：用例还没跑，而且 project.yaml 里没有测试命令。'
-    Say '先别跑。告诉我后端和前端怎么在本地启动，测试命令是哪一条。口令不要发在对话里，只给 Bitwarden 条目名。'
+    Ask '用例还不能自动跑。后端和前端在本地怎么启动，测试命令是哪一条？口令不要发在对话里，只给 Bitwarden 条目名。'
     exit 0
   }
   Emit '还差：用例写了，但还有未执行的自动项。'
-  Say '执行这个需求里标了 auto 的用例。没有命令输出就不要写成通过。'
+  AgentStep '按 flow-test 执行标了 auto 的用例。没有命令输出就不要写成通过。失败就停下来把现象告诉用户。'
   exit 0
 }
 
@@ -252,10 +260,10 @@ Emit '这条需求的文件已经齐，用例也没有挂着未执行。'
 if ($later.Count -gt 0) {
   Emit '还可以优化：'
   $later | ForEach-Object { Emit "- $_" }
-  Say '看上面还可以优化的第一条，做完再叫我。'
+  AgentStep '做上面还可以优化里的第一条里、不需要用户拍板的那一件。需要用户确认的，改成提问。做完再跑 next.ps1。'
   exit 0
 }
-Say '这条需求可以收工。下一个需求对我说：新建需求，并告诉我标题。'
+Ask '这条需求可以收工。要开下一条时，告诉我标题或工单号。'
 exit 0
 } finally {
   Save-Next

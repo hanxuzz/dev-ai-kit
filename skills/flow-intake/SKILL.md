@@ -13,6 +13,6 @@ description: >-
 3. 目录不存在才新建，并且只放 `status.yaml`。不要复制 `01` 到 `07`。
 4. 把 `project.local.yaml` 的 `current` 写成这个需求号。
 5. 若 `share.path` 非空，在 `<共享目录>/requirements/<需求号>/` 建空目录，并提醒用户把录像、PPT、PDF 放这里，同时在共享目录 `index.md` 加一行。没有共享目录就说明原件还没有落点。已经在需求目录里的文件不要搬出去。
-6. 再跑一次 `validate.ps1`。失败则只删除这次新建且仍为空的目录；原来就有的目录不要删。把 `FAIL` 告诉用户。成功则运行 `scripts/next.ps1`，把「下一步就做这一句」告诉用户。
+6. 再跑一次 `validate.ps1`。失败则只删除这次新建且仍为空的目录；原来就有的目录不要删。把 `FAIL` 告诉用户。成功则运行 `scripts/next.ps1`，按 `skills/flow-next/SKILL.md` 处理「由你来做」或「请用户定」。
 
 需求号一旦写进 `status.yaml` 就不要另起一个意思相同的目录。后面的 `M`、`R`、`T` 都挂在这个号上。编号规则见 `docs/practices.md`。

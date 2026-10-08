@@ -16,7 +16,7 @@
 
 写需求文件之前运行 `<kit.path>/scripts/validate.ps1 -Workspace <工作区>`。失败就停，把 `FAIL` 那一行告诉用户。
 
-用户不知道下一步，或本阶段做完时，运行 `<kit.path>/scripts/next.ps1 -Workspace <工作区>`，只把「下一步就做这一句」当作当前建议。
+用户不知道下一步，或本阶段做完时，运行 `<kit.path>/scripts/next.ps1 -Workspace <工作区>`。`下一步由你来做` 要在本轮执行。`下一步请用户定` 才问用户。不要让用户把脚本里的句子发回来。
 
 ## 什么时候用套件
 
