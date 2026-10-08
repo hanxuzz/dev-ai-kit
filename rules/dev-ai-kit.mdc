@@ -1,0 +1,14 @@
+---
+description: 判断本轮对话要不要走 dev-ai-kit
+alwaysApply: true
+---
+
+本工作区已安装 dev-ai-kit。套件路径、共享目录和当前需求号在工作区根的 `project.local.yaml`。文档放哪、状态机和文件名以套件的 `docs/layout.md`、`docs/runtime.md` 为准。
+
+仅当用户在办安装、项目背景、录屏、需求资料、需求整理、影响点、开发顺序、按计划改代码、测试、提交时，才读取套件并按对应技能执行。其他编程问题直接处理。
+
+开始写需求文件或改业务代码之前，运行套件 `scripts/validate.ps1`。失败就停。技能正文在 `project.local.yaml` 的 `kit.path` 下的 `skills/`。文档冲突时以 `docs/trust.md` 为准。用户说「做第 N 步」时读 `skills/flow-implement/SKILL.md`，并遵守 `docs/code-style.md`。代码仓已有规范时以代码仓为准。
+
+`questions: open` 时，`stage` 必须是 `questions`。禁止创建 `04-requirement.md`、`05-impact.md`、`06-plan.md`，禁止修改前后端业务代码。
+
+原件放共享目录。转写过程文件不进文档根。密码不写入任何文件。`blocker` 非空时，先把这句话告诉用户，再决定要不要继续这条需求。

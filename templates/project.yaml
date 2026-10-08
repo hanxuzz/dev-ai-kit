@@ -1,0 +1,23 @@
+# 可提交的项目配置示例。安装脚本会按这个结构生成，不会覆盖已有文件。
+# 本机绝对路径写在 project.local.yaml。口令不写在这里。
+
+project: psl
+
+repos:
+  frontend: frontend
+  backend: backend
+
+docs:
+  # repo | share | local
+  mode: local
+  path: docs
+
+runtime:
+  backend:
+    start: ""
+  frontend:
+    start: ""
+  database:
+    readonly: false
+    bitwarden: ""
+  test: ""

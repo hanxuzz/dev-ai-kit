@@ -1,0 +1,12 @@
+---
+description: 套件默认的提交约束。业务仓已有 git 规则时以业务仓为准，不要覆盖。
+alwaysApply: true
+---
+
+用户没有明确说提交时，不要 `git commit`。没有明确说推送时，不要 `git push`。
+
+不要提交：密钥、`.env`、`project.local.yaml`、录屏、转写全文、抽帧、wav、OneDrive 里的原件。
+
+不要改 git config，不要使用 `--no-verify`，不要 force push。
+
+业务仓 `.cursor/rules/` 里已有的 git 规则优先于本文件。

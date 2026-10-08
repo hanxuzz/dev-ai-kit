@@ -1,0 +1,5 @@
+name: dev-ai-kit
+version: 0.1.0
+# 安装技能据此克隆；本机已有目录时优先用本机这份。
+git: "https://github.com/hanxuzz/dev-ai-kit"
+default_dir: Documents/dev-ai-kit
