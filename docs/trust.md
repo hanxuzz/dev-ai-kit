@@ -24,7 +24,7 @@
 | `05-impact.md` | 代码事实：路径和现状。写「要改」的路径必须在仓库里存在；写「新增」的路径可以还不存在 |
 | `04-requirement.md` | 确认后的范围，含「不做」。开发顺序和改动不得超出这里 |
 | `06-plan.md` | 执行清单。任务若超出 `04` 的「不做」，标成不执行，不要做 |
-| `01-meeting.md`、`02-sources.md` | 来源。和已确认的 `04` 冲突时，以 `04` 为准；还没确认时，写进 `03-questions.md` 并停住 |
+| `01-meeting.md`、`02-sources.md`、Figma、截图、PPT、PDF | 原始需求。做界面或交互时以这些原件为准。整理后的规格和计划不能代替原件 |
 | `07-testcases.md` | 怎么验收。对不上 `runtime` 里已有命令的条目标 `manual` |
 
 三份核心材料是需求、影响点、开发顺序。默认文件名是 `04-requirement.md`、`05-impact.md`、`06-plan.md`。目录里已经有 Spec 或计划时，把文件名写进 `status.yaml` 的 `files.requirement`、`files.impact`、`files.plan`，不要另建三份空文档。做实现时，指向的文件缺一份，或正文少于一两句，就停止。
