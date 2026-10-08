@@ -48,20 +48,20 @@ foreach ($rel in @(
 
 $skills = Join-Path $kitRoot "skills"
 if (Test-Path -LiteralPath $skills) {
-    Get-ChildItem -LiteralPath $skills -Directory | ForEach-Object {
-        $skillFile = Join-Path $_.FullName "SKILL.md"
-        $name = $_.Name
+    foreach ($dir in @(Get-ChildItem -LiteralPath $skills -Directory)) {
+        $skillFile = Join-Path $dir.FullName "SKILL.md"
         if (Test-Path -LiteralPath $skillFile) {
-            Write-Host "ok   skill $name"
+            Write-Host "ok   skill $($dir.Name)"
         } else {
-            Write-Host "miss skill $name"
-            $missing += "skill $name"
+            Write-Host "miss skill $($dir.Name)"
+            $missing += "skill $($dir.Name)"
         }
     }
 } else {
     Write-Host "miss skills directory"
     $missing += "skills"
 }
+$docs = Join-Path $kitRoot "docs"
 $docCount = 0
 if (Test-Path -LiteralPath $docs) {
     $docCount = @(Get-ChildItem -LiteralPath $docs -Filter "*.md" -File).Count
