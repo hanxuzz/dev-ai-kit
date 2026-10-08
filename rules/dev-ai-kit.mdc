@@ -11,7 +11,7 @@ alwaysApply: true
 
 `conventions.branch.enabled` 默认是 `false`。不要因为远程默认分支显示 `main` 就建 `feature/{id}`。仓库已有分支做法时按仓库做。已有 Spec 和计划不要改名，写进该需求 `status.yaml` 的 `files.requirement`、`files.impact`、`files.plan`。`runtime` 为空时不启动服务、不连库。
 
-用户问下一步，或一个阶段做完时，先运行 `project.local.yaml` 里 `kit.path` 下的 `scripts/next.ps1 -Workspace` 当前工作区。以工作区 `.cursor/next-step.txt` 为准。回复第一句用其中的「套件进度」。`下一步由你来做` 要在本轮执行，并把已有规格和计划整理成套件要的文件。`下一步请用户定` 才向用户提问。
+用户问下一步，或一个阶段做完时，先运行 `scripts/next.ps1` 和 `scripts/check.ps1`。回复里写明套件进度、技能安装是否通过、请你确认什么、请你做什么。没有要确认或要做的，写「无」。
 
 开始写需求文件或改业务代码之前，运行 `kit.path` 下的 `scripts/validate.ps1`。失败就停。技能正文在 `kit.path` 下的 `skills/`。文档冲突时以 `kit.path` 下的 `docs/trust.md` 为准。用户说「做第 N 步」时读 `skills/flow-implement/SKILL.md`，并遵守 `docs/code-style.md`。代码仓已有规范时以代码仓为准。
 

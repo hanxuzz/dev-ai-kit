@@ -46,7 +46,22 @@ foreach ($rel in @(
     }
 }
 
-$docs = Join-Path $kitRoot "docs"
+$skills = Join-Path $kitRoot "skills"
+if (Test-Path -LiteralPath $skills) {
+    Get-ChildItem -LiteralPath $skills -Directory | ForEach-Object {
+        $skillFile = Join-Path $_.FullName "SKILL.md"
+        $name = $_.Name
+        if (Test-Path -LiteralPath $skillFile) {
+            Write-Host "ok   skill $name"
+        } else {
+            Write-Host "miss skill $name"
+            $missing += "skill $name"
+        }
+    }
+} else {
+    Write-Host "miss skills directory"
+    $missing += "skills"
+}
 $docCount = 0
 if (Test-Path -LiteralPath $docs) {
     $docCount = @(Get-ChildItem -LiteralPath $docs -Filter "*.md" -File).Count
@@ -103,10 +118,14 @@ if ($hasBw) {
 
 Write-Host ""
 if ($missing.Count -eq 0) {
-    Write-Host "check passed"
+    Write-Host "技能安装：通过。套件内技能和本机依赖都在。"
+    Write-Host "请你确认：无"
+    Write-Host "请你做：无"
     exit 0
 }
 
-Write-Host ("missing: " + ($missing -join ", "))
+Write-Host ("技能安装：未通过。缺 " + ($missing -join ", "))
+Write-Host "请你确认：无"
+Write-Host "请你做：按 docs/dependencies.md 补上缺的本机依赖。套件仓库里的 skill 文件缺失时，重新克隆套件，不要手抄。"
 Write-Host "see docs/dependencies.md"
 exit 1
