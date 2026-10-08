@@ -47,11 +47,6 @@ if (-not (Test-Path -LiteralPath $projectFile)) {
 $project = Read-SimpleYaml $projectFile
 $confirmed = ''
 if ($project.conventions) { $confirmed = [string]$project.conventions.confirmed }
-if ($confirmed -ne 'true') {
-  Emit '还差：分支和提交规范还没按这个项目确认。默认建议在 docs/conventions.md，现在不会自动建分支。'
-  Say '对照各代码仓现在的分支，告诉我哪些规范打开、哪些关掉。确认前不要新建需求，也不要改代码。'
-  exit 0
-}
 
 $local = $null
 if (Test-Path -LiteralPath $localFile) { $local = Read-SimpleYaml $localFile }
@@ -70,6 +65,9 @@ if (-not $docsRoot -or -not (Test-Path -LiteralPath $docsRoot)) {
 $docsRoot = (Resolve-Path -LiteralPath $docsRoot).Path
 
 $later = New-Object System.Collections.Generic.List[string]
+if ($confirmed -ne 'true') {
+  $later.Add('分支和提交规范还没确认。整理材料和接上已有需求可以先做。改代码或建分支之前要先确认。')
+}
 $bg = Join-Path $docsRoot 'team\background.md'
 if (-not (Test-Path -LiteralPath $bg)) {
   Emit '还差：还没有项目背景。'
@@ -186,6 +184,11 @@ foreach ($step in $steps) {
 $planPath = Join-Path $dir '06-plan.md'
 $planText = [System.IO.File]::ReadAllText($planPath)
 if ($planText -match '(?m)^- \[ \]') {
+  if ($confirmed -ne 'true') {
+    Emit '还差：要改代码了，但分支和提交规范还没按这个仓库确认。'
+    Say '对照各代码仓现在的分支和已有的 AGENTS.md，告诉我哪些规范打开、哪些关掉。确认前不要建分支，也不要改代码。'
+    exit 0
+  }
   $branchOn = ''
   if ($project.conventions -and $project.conventions.branch) {
     $branchOn = [string]$project.conventions.branch.enabled

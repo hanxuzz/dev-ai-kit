@@ -59,7 +59,7 @@ macOS / Linux 用 `scripts/install.sh`，参数相同。
 
 ## 6. 确认规范
 
-`project.yaml` 里的 `conventions` 此时只是建议，`confirmed` 仍是 `false`。按 `skills/flow-conventions/SKILL.md` 看各仓库当前分支，请用户逐项打开或关掉。用户没确认前，不要把 `confirmed` 写成 `true`，也不要新建需求。
+`project.yaml` 里的 `conventions` 此时只是建议，`confirmed` 仍是 `false`。按 `skills/flow-conventions/SKILL.md` 看各仓库当前分支和已有的 `AGENTS.md`，请用户逐项打开或关掉。仓库已有分支规则时，建议关掉套件的自动建分支。用户没确认前，不要把 `confirmed` 写成 `true`。确认前可以整理已有材料，不要建分支，不要改业务代码。
 
 ## 7. 检查依赖
 

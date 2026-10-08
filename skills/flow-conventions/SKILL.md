@@ -7,7 +7,7 @@ description: >-
 
 # 确认分支和提交规范
 
-读 `docs/conventions.md`。`project.yaml` 里没有 `conventions`，或 `confirmed` 不是 `true` 时，先做完这里，不要新建需求，不要改业务代码。
+读 `docs/conventions.md` 和 `docs/trust.md` 里的「严和松」。`project.yaml` 里没有 `conventions`，或 `confirmed` 不是 `true` 时，改代码和建分支之前做完这里。起草背景、接上已有需求、整理材料可以先做。
 
 ## 看现状
 
