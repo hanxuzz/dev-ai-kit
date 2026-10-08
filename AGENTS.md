@@ -2,6 +2,10 @@
 
 给在业务工作区里工作的 Agent。套件仓库还差什么看 [PLAN.md](PLAN.md)。
 
+## 写套件文档时
+
+这是给同事用的仓库，不是某一个人的本机工具。说明、模板、技能里只出现仓库地址 https://github.com/hanxuzz/dev-ai-kit 。不要写入任何同事的用户目录、磁盘路径或「我这台电脑上的位置」。每人克隆到哪里，只记在该项目不提交的 `project.local.yaml`。
+
 ## 先读什么
 
 1. 工作区根的 `project.yaml` 和 `project.local.yaml`。套件路径是 `kit.path`，当前需求号是 `current`。机器路径只放在 `project.local.yaml`。
@@ -11,6 +15,8 @@
 找不到 `kit.path` 就停止，让用户先执行工作区根的 `skill.md`。
 
 写需求文件之前运行 `<kit.path>/scripts/validate.ps1 -Workspace <工作区>`。失败就停，把 `FAIL` 那一行告诉用户。
+
+用户不知道下一步，或本阶段做完时，运行 `<kit.path>/scripts/next.ps1 -Workspace <工作区>`，只把「下一步就做这一句」当作当前建议。
 
 ## 什么时候用套件
 

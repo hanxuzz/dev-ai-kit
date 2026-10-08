@@ -6,13 +6,14 @@
 |------|------|------|
 | `scripts/install.ps1` | 写工作区配置、规则、`team/` 骨架。已有的 `project.yaml`、`project.local.yaml` 和改过的规则不覆盖 | 退出码 0，末行 `OK install` |
 | `scripts/validate.ps1` | 检查文档落点、需求状态、问题门禁 | 退出码 0，末行 `OK validate` |
+| `scripts/next.ps1` | 根据已有文件给出下一句该说什么 | 退出码 0，并打印「下一步就做这一句」 |
 | `scripts/check.ps1` | 检查 `asr-watch`、`ffmpeg`、`agent-browser` 是否存在 | 只打印 OK / MISSING，不安装 |
 
 Windows：
 
-```powershell
-powershell -NoProfile -File scripts\install.ps1 -Workspace C:\work\psl -Kit $env:USERPROFILE\Documents\dev-ai-kit
-powershell -NoProfile -File scripts\validate.ps1 -Workspace C:\work\psl
+```text
+<套件克隆目录>\scripts\install.ps1 -Workspace <业务项目文件夹> -Kit <套件克隆目录>
+<套件克隆目录>\scripts\validate.ps1 -Workspace <业务项目文件夹>
 ```
 
 `install.ps1` 会在结束时自己再跑一次 `validate.ps1`。

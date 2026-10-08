@@ -29,7 +29,11 @@ check_file "docs/trust.md"
 check_file "docs/practices.md"
 check_file "docs/fit.md"
 check_file "docs/code-style.md"
+check_file "docs/secrets.md"
+check_file "skills/flow-bitwarden/SKILL.md"
 check_file "skills/flow-implement/SKILL.md"
+check_file "skills/flow-next/SKILL.md"
+check_file "scripts/next.ps1"
 check_file "scripts/validate.ps1"
 check_file "templates/requirements/status.yaml"
 
@@ -59,6 +63,12 @@ if [ -d "$HOME/.cursor/aifred-agent-browser" ]; then
 else
   echo "miss agent-browser source"
   missing=1
+fi
+
+if [ -f "$HOME/.cursor/mcp.json" ] && grep -q bitwarden "$HOME/.cursor/mcp.json"; then
+  echo "ok   bitwarden mcp"
+else
+  echo "warn bitwarden mcp is not in user mcp.json; see docs/secrets.md"
 fi
 
 echo

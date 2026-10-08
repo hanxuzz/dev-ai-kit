@@ -12,13 +12,17 @@ disable-model-invocation: true
 
 ## 1. 找到套件
 
+仓库地址（写在这里，因为本文件会被复制到业务项目里，那时旁边还没有套件）：
+
+https://github.com/hanxuzz/dev-ai-kit
+
 按顺序查找，找到即停：
 
 1. 环境变量 `DEV_AI_KIT`
-2. `%USERPROFILE%\Documents\dev-ai-kit`（macOS 为 `~/Documents/dev-ai-kit`）
+2. 用户在这次对话里给出的克隆目录
 3. 该目录必须有 `kit.yaml`、`AGENTS.md`、`scripts/install.ps1`
 
-都没有：看套件 `kit.yaml` 的 `git`。为空就停，请用户把套件放到默认路径。有地址则克隆到默认路径。禁止克隆到当前工作区里面。
+都没有：请用户把上面的仓库克隆到自己电脑上的任意目录，把路径发过来。禁止克隆到当前业务项目里面。禁止假设某位同事的用户名或磁盘路径。
 
 ## 2. 确认工作区
 

@@ -103,4 +103,5 @@ blocker: ""
 | flow-plan | `04`、`05`，且 questions 不是 open | `06-plan.md` |
 | flow-implement | `06-plan.md`、代码仓 `AGENTS.md` | 只改当前任务点名的代码，并勾选该任务 |
 | flow-test | `04`、`06`、`project.yaml` 的 runtime | `07-testcases.md`；命令为空则只写配置说明 |
+| flow-bitwarden | Bitwarden MCP | 只在配置和需求文档里留下文件夹与条目名 |
 | flow-git | 业务仓现有规则、`06-plan.md` | 按用户当次要求提交，不写新的需求文档 |

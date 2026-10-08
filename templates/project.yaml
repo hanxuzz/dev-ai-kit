@@ -21,3 +21,7 @@ runtime:
     readonly: false
     bitwarden: ""
   test: ""
+
+secrets:
+  # Bitwarden 文件夹名，例如 个人/psl。口令不写在这里。
+  bitwarden_folder: ""

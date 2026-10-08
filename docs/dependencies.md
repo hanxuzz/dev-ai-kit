@@ -37,6 +37,10 @@
 
 令牌和 cookie 不写进套件、不写进需求文档。
 
+## Bitwarden
+
+密码和连接串用本机已有的 Bitwarden MCP，用法见 `docs/secrets.md` 和 `skills/flow-bitwarden/SKILL.md`。套件不保存会话，也不复制 `mcp.json`。
+
 ## 本套件不附带的东西
 
 - FunASR 模型权重

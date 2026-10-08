@@ -104,6 +104,9 @@ runtime:
     readonly: false
     bitwarden: ""
   test: ""
+
+secrets:
+  bitwarden_folder: ""
 "@
   Write-Utf8 $projectFile $yaml
   Write-Output 'WROTE project.yaml'

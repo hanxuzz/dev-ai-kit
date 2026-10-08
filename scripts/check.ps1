@@ -1,4 +1,4 @@
-# Report whether kit files and local dependencies exist.
+﻿# Report whether kit files and local dependencies exist.
 # Does not install, download, or connect to anything.
 
 $ErrorActionPreference = "Continue"
@@ -26,8 +26,11 @@ foreach ($rel in @(
     "docs\trust.md",
     "docs\practices.md",
     "docs\fit.md",
-    "docs\code-style.md",
+    "docs\secrets.md",
+    "skills\flow-bitwarden\SKILL.md",
     "skills\flow-implement\SKILL.md",
+    "skills\flow-next\SKILL.md",
+    "scripts\next.ps1",
     "scripts\validate.ps1",
     "templates\requirements\status.yaml"
 )) {
@@ -82,6 +85,17 @@ if (Test-Path -LiteralPath $browserSrc) {
 } else {
     Write-Host "miss agent-browser source"
     $missing += "aifred-agent-browser"
+}
+
+$mcp = Join-Path $env:USERPROFILE ".cursor\mcp.json"
+$hasBw = $false
+if (Test-Path -LiteralPath $mcp) {
+    $hasBw = Select-String -LiteralPath $mcp -Pattern "bitwarden" -Quiet -SimpleMatch
+}
+if ($hasBw) {
+    Write-Host "ok   bitwarden mcp"
+} else {
+    Write-Host "warn bitwarden mcp is not in user mcp.json; see docs/secrets.md"
 }
 
 Write-Host ""

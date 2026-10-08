@@ -1,6 +1,6 @@
 # 使用手册
 
-假设你是后端开发，项目叫 `psl`。前后端已经克隆到同一个文件夹里，环境按项目自己的说明配好了。用 Cursor 打开的是 `psl/`。什么项目适合用这套，见 [docs/fit.md](docs/fit.md)。写代码和注释时，项目仓库里的规范优先，没有则见 [docs/code-style.md](docs/code-style.md)。
+业务项目要已经有代码，并用 Cursor 打开包住前端和后端的那一层。什么项目适合，见 [docs/fit.md](docs/fit.md)。这套工具是做什么的、能做哪些事，见 [开始.md](开始.md)。写代码和注释时，项目仓库里的规范优先，没有则见 [docs/code-style.md](docs/code-style.md)。
 
 ## 1. 安装一次
 

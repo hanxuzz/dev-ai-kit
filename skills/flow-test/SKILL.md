@@ -25,7 +25,7 @@ description: >-
 | `database.readonly` | 不是 `true` 就不连接数据库。说明需要一个没有写权限的账号，并把 Bitwarden 条目名填进 `runtime.database.bitwarden` |
 | `test` | 不跑测试命令。指出要填哪个字段 |
 
-口令只从用户本机的密钥管理读取，不写进需求文档，也不写进命令输出粘贴。连接失败时把现象写入用例文末，并把 `blocker` 设为该现象，不反复重试登录。
+口令只从 Bitwarden 读取，按 `skills/flow-bitwarden/SKILL.md`。不写进需求文档，也不写进命令输出粘贴。连接失败时把现象写入用例文末，并把 `blocker` 设为该现象，不反复重试登录。
 
 页面操作类用例：先按 `docs/dependencies.md` 检查 `agent-browser`。前置不齐就停，并指出技能和扩展所在目录。齐了再按该技能操作浏览器。
 
