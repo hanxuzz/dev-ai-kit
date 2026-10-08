@@ -11,7 +11,7 @@ description: >-
 ## 检查
 
 1. `current` 指向的需求目录要存在，且其中有 `status.yaml`。没有则先按 `flow-intake` 建，不要在文档根外写纪要。
-2. 录像路径来自用户，或来自共享目录 `index.md` 里这条需求的登记。索引没有就停，请用户把路径补进 `index.md`。不要搜索整个 OneDrive。
+2. 录像路径优先用用户这次给出的文件。没有给出时，再看共享目录 `index.md` 里这条需求的登记。索引没有、用户也没给路径就停，请用户把路径发过来或补进 `index.md`。不要搜索整个 OneDrive。没有共享目录时，只要用户给了文件路径就可以继续。
 3. 索引有路径但文件本地不存在：把 `blocker` 写成「录像未同步：<路径>」，停止。不要写 `01-meeting.md`。
 4. 本机要有 `asr-watch` 命令和 `ffmpeg`。缺则按 `docs/dependencies.md` 告诉用户，把缺什么写入 `blocker`，停止。
 

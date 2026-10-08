@@ -6,7 +6,7 @@
 
 | 文件 | 谁产生 | 是否提交 |
 |------|--------|----------|
-| `skill.md` | 人从套件 `bootstrap/SKILL.md` 复制 | 否，安装完可留在本地 |
+| （无 `skill.md`） | 安装由对话里的仓库地址触发。Cursor 克隆套件到业务文件夹外面，路径只写在 `project.local.yaml` | — |
 | `project.yaml` | 安装技能 | 若工作区不是 git 仓库，则无所谓；不要把本机绝对路径写进来 |
 | `project.local.yaml` | 安装技能 | 否。本机套件路径、OneDrive 路径只放这里 |
 | `.cursor/rules/dev-ai-kit.mdc` | 安装技能，来自套件 `rules/dev-ai-kit.mdc` | 随团队约定。建议提交，里面没有本机路径 |
@@ -96,12 +96,14 @@ blocker: ""
 
 | 技能 | 读 | 写 |
 |------|----|----|
+| flow-conventions | 各代码仓当前分支、已有 git 规则 | 只改 `project.yaml` 的 `conventions`，且要用户明确同意 |
 | flow-intake | `project.yaml`、`team/` | 只建需求目录和 `status.yaml`，并更新 `current` |
 | flow-meeting | 共享目录索引、`glossary.md`、录像、转写文件 | `01-meeting.md`；失败时只写 `blocker` |
 | flow-sources | 用户给的链接和原件 | `02-sources.md`；冲突则追加 `03-questions.md` |
 | flow-impact | `01`、`02`、`team/`、前后端代码 | 有冲突则只写 `03-questions.md`；确认后才写 `04` 与 `05` |
 | flow-plan | `04`、`05`，且 questions 不是 open | `06-plan.md` |
-| flow-implement | `06-plan.md`、代码仓 `AGENTS.md` | 只改当前任务点名的代码，并勾选该任务 |
+| flow-implement | `06-plan.md`、`conventions`、代码仓 `AGENTS.md` | 规范要求建分支时先建再改；只改当前任务点名的代码，并勾选该任务 |
 | flow-test | `04`、`06`、`project.yaml` 的 runtime | `07-testcases.md`；命令为空则只写配置说明 |
 | flow-bitwarden | Bitwarden MCP | 只在配置和需求文档里留下文件夹与条目名 |
 | flow-git | 业务仓现有规则、`06-plan.md` | 按用户当次要求提交，不写新的需求文档 |
+| flow-next | `project.yaml`、当前需求目录 | 只写 `.cursor/next-step.txt`，不改需求文件 |

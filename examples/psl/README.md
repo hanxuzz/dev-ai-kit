@@ -4,7 +4,6 @@
 
 ```text
 psl/
-  skill.md                     # 由 bootstrap/SKILL.md 复制，只用于安装一次
   project.yaml
   project.local.yaml           # 不提交
   .cursor/rules/dev-ai-kit.mdc

@@ -25,3 +25,18 @@ runtime:
 secrets:
   # Bitwarden 文件夹名，例如 个人/psl。口令不写在这里。
   bitwarden_folder: ""
+
+# 先看 docs/conventions.md。confirmed 写成 true 之前，这些只是建议，不会自动建分支。
+conventions:
+  confirmed: false
+  branch:
+    enabled: true
+    base: ""
+    pattern: "feature/{id}"
+  commit:
+    only_when_asked: true
+    allow_on_base: false
+  push:
+    only_when_asked: true
+  trailer:
+    coauthor: false

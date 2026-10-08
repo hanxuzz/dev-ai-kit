@@ -107,6 +107,21 @@ runtime:
 
 secrets:
   bitwarden_folder: ""
+
+# 安装后先对照仓库现状确认。confirmed 不是 true 时，不要新建需求分支，也不要改业务代码。
+conventions:
+  confirmed: false
+  branch:
+    enabled: true
+    base: ""
+    pattern: "feature/{id}"
+  commit:
+    only_when_asked: true
+    allow_on_base: false
+  push:
+    only_when_asked: true
+  trailer:
+    coauthor: false
 "@
   Write-Utf8 $projectFile $yaml
   Write-Output 'WROTE project.yaml'
@@ -182,7 +197,7 @@ if ($DocsMode -eq 'share' -or ($local.share -and [string]$local.share.path)) {
 }
 
 $ignore = Join-Path $Workspace '.gitignore'
-$lines = @('project.local.yaml', 'skill.md')
+$lines = @('project.local.yaml', 'skill.md', '.cursor/next-step.txt')
 if ($DocsMode -eq 'local') { $lines += '/docs/' }
 $existing = ''
 if (Test-Path -LiteralPath $ignore) { $existing = [System.IO.File]::ReadAllText($ignore) }

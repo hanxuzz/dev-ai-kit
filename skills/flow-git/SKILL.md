@@ -8,11 +8,15 @@ description: >-
 
 用户没有明确说「提交」或「commit」时，不要执行 `git commit` 或 `git push`。
 
-按 `docs/runtime.md` 做开始检查。正在处理的需求 `questions` 为 `open` 时，不要提交这条需求对应的业务改动。
+按 `docs/runtime.md` 做开始检查，并读 `project.yaml` 的 `conventions`。正在处理的需求 `questions` 为 `open` 时，不要提交这条需求对应的业务改动。
+
+`conventions.confirmed` 不是 `true` 时停止，先走 `skills/flow-conventions/SKILL.md`。
 
 该任务在 `06-plan.md` 里写了验证命令时，本轮要先看到这个命令的退出码，再提交。没跑过就停，不要把「应该能过」写进提交说明。
 
-当前分支是 `main` 或 `master` 时，用户没有在这句话里点名该分支，就不要提交。
+`commit.only_when_asked` 为 `true` 时，用户没有明确说「提交」或「commit」，不要提交。`push.only_when_asked` 为 `true` 时，用户没有明确说推送，不要推送。`commit.allow_on_base` 不是 `true` 时，不要在 `branch.base`、`main`、`master` 上提交，除非用户在这句话里点名了该分支。`trailer.coauthor` 不是 `true` 时，提交说明里不要写 `Co-authored-by`。
+
+这些开关不覆盖该代码仓 `.cursor/rules` 里已有的 git 规则。仓库规则更严时，按仓库规则。
 
 ## 哪个仓库
 

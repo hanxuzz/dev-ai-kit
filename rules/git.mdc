@@ -10,3 +10,5 @@ alwaysApply: true
 不要改 git config，不要使用 `--no-verify`，不要 force push。
 
 业务仓 `.cursor/rules/` 里已有的 git 规则优先于本文件。
+
+分支按工作区 `project.yaml` 的 `conventions`。`confirmed` 不是 `true` 时不要建分支。`branch.enabled` 为 `true` 时，计划写好后、改代码前，在要改的仓库上使用 `branch.pattern`（`{id}` 为需求号），从 `branch.base` 拉出。不在主干上提交。

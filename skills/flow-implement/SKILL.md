@@ -10,13 +10,18 @@ description: >-
 
 `questions` 为 `open`，或 `06-plan.md` 不存在时，停止，不要改业务代码。
 
+`project.yaml` 的 `conventions.confirmed` 不是 `true` 时，停止，改走 `skills/flow-conventions/SKILL.md`。
+
 ## 开始前
 
 1. `current` 指向的需求不明确，或目录多于一个：让用户选定，不要默认第一个。
 2. 读该代码仓的 `AGENTS.md`（没有就读 `README`）。把红线列在对话里。没有这类文件就说明「无项目约定」，改代码时再读套件 `docs/code-style.md`。项目里已有的写法优先于这份说明。
 3. 读 `06-plan.md`。用户点名的任务若标了「不执行」，跳过并说明原因。
 4. 用户没点名任务时，只做第一个未勾选的任务，然后停下。
-5. 当前 git 分支是 `main` 或 `master` 时，先告诉用户，等用户明确说就在这个分支改，再动代码。
+5. 分支：`conventions.branch.enabled` 为 `true` 时，先处理分支再改文件。分支名用 `pattern`，把 `{id}` 换成需求号。`base` 为空就停止并问主干，不要猜。
+   - 该任务要改的那个仓库里，若已在这条分支上，继续。
+   - 没有这条分支：工作区干净时从 `base` 建出来并切过去。有未提交改动就停，问用户怎么处理。
+   - `enabled` 不是 `true` 时，不新建分支。当前分支是 `base`、`main` 或 `master` 时，先告诉用户，等用户点名可以在这个分支改，再动代码。
 
 ## 改代码
 

@@ -1,28 +1,29 @@
 ---
 name: kit-bootstrap
 description: >-
-  一次性安装 dev-ai-kit。用户把本文件复制为业务工作区根目录的 skill.md 并要求执行时使用。
-  决定文档去处，运行安装脚本，起草未确认的项目背景，并告知新开对话。
+  一次性安装 dev-ai-kit。用户在业务项目里给出仓库地址并要求安装时使用。
+  先把套件克隆到业务文件夹外面，再决定文档去处、运行安装脚本、起草未确认的项目背景，并告知新开对话。
 disable-model-invocation: true
 ---
 
 # 安装 dev-ai-kit（只执行一次）
 
-用户把本文件放在业务工作区根目录（例如 `psl/skill.md`）并要求执行时，按下面顺序做。做完告诉用户新开一条对话。不要把套件克隆进工作区内部。
+用户在业务项目的对话里给出仓库地址并要求安装时，按下面顺序做。不要把 `skill.md` 复制进业务项目。做完告诉用户新开一条对话。不要把套件克隆进工作区内部。
 
-## 1. 找到套件
+## 1. 找到或克隆套件
 
-仓库地址（写在这里，因为本文件会被复制到业务项目里，那时旁边还没有套件）：
+仓库地址：https://github.com/hanxuzz/dev-ai-kit
 
-https://github.com/hanxuzz/dev-ai-kit
-
-按顺序查找，找到即停：
+按顺序查找，找到即停。目录里要有 `kit.yaml`、`AGENTS.md`、`scripts/install.ps1` 才算找到。
 
 1. 环境变量 `DEV_AI_KIT`
-2. 用户在这次对话里给出的克隆目录
-3. 该目录必须有 `kit.yaml`、`AGENTS.md`、`scripts/install.ps1`
+2. 当前工作区 `project.local.yaml` 里已有的 `kit.path`
+3. 用户在这次对话里给出的克隆目录
+4. 工作区的上一级目录里、名为 `dev-ai-kit` 的文件夹
 
-都没有：请用户把上面的仓库克隆到自己电脑上的任意目录，把路径发过来。禁止克隆到当前业务项目里面。禁止假设某位同事的用户名或磁盘路径。
+都没有：在工作区的上一级执行 `git clone https://github.com/hanxuzz/dev-ai-kit`。上一级里已经有同名文件夹但不是这个套件时，停下来问克隆到哪，不要覆盖。禁止克隆到当前业务项目里面。禁止假设某位同事的用户名或磁盘路径。
+
+克隆因权限失败时，请用户在本机登录能访问该私有仓库的 GitHub 账号后重试。不要让用户把令牌或密码发到对话里。
 
 ## 2. 确认工作区
 
@@ -53,15 +54,17 @@ macOS / Linux 用 `scripts/install.sh`，参数相同。
 
 ## 5. 起草项目背景
 
-安装只复制空模板。接着读前后端 README 和一级目录，补全文档根 `team/background.md` 和 `team/map.md`。保留文首的「未确认」。看不懂的章节留空并列出要用户补的点。已经没有「未确认」的背景文件不要整篇重写。
+安装只复制空模板。接着读前后端 README 和一级目录，补全文档根 `team/background.md` 和 `team/map.md`。保留文首的「未确认」。看不懂的章节留空并列出要用户补的点。已经没有「未确认」的背景文件不要整篇重写。`runtime` 留空。不要发明启动命令。
 
-`runtime` 留空。不要发明启动命令。以后要本地启动或连接只读库时，按 `skills/flow-test/SKILL.md` 填写 `project.yaml`。
+## 6. 确认规范
 
-## 6. 检查依赖
+`project.yaml` 里的 `conventions` 此时只是建议，`confirmed` 仍是 `false`。按 `skills/flow-conventions/SKILL.md` 看各仓库当前分支，请用户逐项打开或关掉。用户没确认前，不要把 `confirmed` 写成 `true`，也不要新建需求。
+
+## 7. 检查依赖
 
 运行 `scripts/check.ps1` 或 `scripts/check.sh`。把缺项告诉用户，并指向 `docs/dependencies.md`。不要在这次安装里下载模型或浏览器扩展。
 
-## 7. 结束语
+## 8. 结束语
 
 向用户说明：
 

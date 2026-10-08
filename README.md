@@ -2,7 +2,7 @@
 
 仓库地址：https://github.com/hanxuzz/dev-ai-kit
 
-同事把这个仓库克隆到自己的电脑后，先读 [开始.md](开始.md)。克隆到哪个目录都可以。不要把套件放进业务项目文件夹里，也不要在说明里写某一台电脑的路径。
+同事用 Cursor 打开业务项目，把本仓库地址发到对话里即可。用法见 [开始.md](开始.md)。Cursor 会把套件克隆到业务文件夹外面。不要把套件放进业务项目里，也不要在说明里写某一台电脑的路径。
 
 ## 接着读
 
@@ -15,6 +15,7 @@
 | [docs/layout.md](docs/layout.md) | 目录和状态 |
 | [docs/trust.md](docs/trust.md) | 需求、代码事实、计划谁说了算 |
 | [docs/runtime.md](docs/runtime.md) | 安装和校验怎么停 |
+| [docs/conventions.md](docs/conventions.md) | 分支和提交的默认开关，安装时确认 |
 | [docs/secrets.md](docs/secrets.md) | 密码放 Bitwarden，仓库里只留条目名 |
 | [AGENTS.md](AGENTS.md) | Agent 的门禁 |
 | [PLAN.md](PLAN.md) | 还没用真实需求走完的部分 |

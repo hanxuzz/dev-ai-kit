@@ -6,7 +6,7 @@
 |------|------|------|
 | `scripts/install.ps1` | 写工作区配置、规则、`team/` 骨架。已有的 `project.yaml`、`project.local.yaml` 和改过的规则不覆盖 | 退出码 0，末行 `OK install` |
 | `scripts/validate.ps1` | 检查文档落点、需求状态、问题门禁 | 退出码 0，末行 `OK validate` |
-| `scripts/next.ps1` | 根据已有文件给出下一句该说什么 | 退出码 0，并打印「下一步就做这一句」 |
+| `scripts/next.ps1` | 根据已有文件给出下一句该说什么，并写入工作区 `.cursor/next-step.txt` | 退出码 0。以该文件里的「下一步就做这一句」为准 |
 | `scripts/check.ps1` | 检查 `asr-watch`、`ffmpeg`、`agent-browser` 是否存在 | 只打印 OK / MISSING，不安装 |
 
 Windows：
