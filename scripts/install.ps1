@@ -125,7 +125,7 @@ secrets:
 conventions:
   confirmed: false
   branch:
-    enabled: true
+    enabled: false
     base: ""
     pattern: "feature/{id}"
   commit:

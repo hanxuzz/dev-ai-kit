@@ -8,7 +8,7 @@ description: >-
 
 用户没有明确说「提交」或「commit」时，不要执行 `git commit` 或 `git push`。
 
-按 `docs/runtime.md` 做开始检查，并读 `project.yaml` 的 `conventions`。正在处理的需求 `questions` 为 `open` 时，不要提交这条需求对应的业务改动。
+按 `docs/runtime.md` 做开始检查。先读文档根 `team/conventions.md`，再读 `project.yaml` 的 `conventions`。两边不一致时，以 `team/conventions.md` 里写明的项目原文为准。正在处理的需求 `questions` 为 `open` 时，不要提交这条需求对应的业务改动。
 
 `conventions.confirmed` 不是 `true` 时停止，先走 `skills/flow-conventions/SKILL.md`。
 
@@ -26,7 +26,7 @@ description: >-
 
 ## 规则优先级
 
-1. 该代码仓 `.cursor/rules` 里已有的提交规则全部照做，不要修改那些文件。
+1. 该代码仓 `AGENTS.md`、`.cursor/rules` 和文档根 `team/conventions.md` 里已有的提交规则全部照做，不要修改仓库里的原文。
 2. 没有项目规则时才用默认：
 
 - 只加入本次相关文件，不要 `git add .`

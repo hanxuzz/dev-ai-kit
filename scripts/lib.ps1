@@ -93,6 +93,20 @@ function Write-Utf8 {
   [System.IO.File]::WriteAllText($Path, $Content.Replace("`n", "`r`n"), $utf8)
 }
 
+function Get-RoleFileName {
+  param($Status, [string]$Role, [string]$Fallback)
+  if ($null -eq $Status) { return $Fallback }
+  $files = $null
+  if ($Status -is [System.Collections.IDictionary] -and $Status.Contains('files')) {
+    $files = $Status['files']
+  }
+  if ($files -is [System.Collections.IDictionary] -and $files.Contains($Role)) {
+    $value = [string]$files[$Role]
+    if ($value) { return $value }
+  }
+  return $Fallback
+}
+
 function Test-CodeRoot {
   param([string]$Dir)
   $markers = @(

@@ -11,4 +11,4 @@ alwaysApply: true
 
 业务仓 `.cursor/rules/` 里已有的 git 规则优先于本文件。
 
-分支按工作区 `project.yaml` 的 `conventions`。`confirmed` 不是 `true` 时不要建分支。`branch.enabled` 为 `true` 时，计划写好后、改代码前，在要改的仓库上使用 `branch.pattern`（`{id}` 为需求号），从 `branch.base` 拉出。不在主干上提交。
+分支按工作区 `project.yaml` 的 `conventions`。`branch.enabled` 不是 `true` 时，不要建分支，也不要按 `feature/{id}` 切换；分支怎么开以业务仓已有规则为准。`enabled` 为 `true` 且 `base` 非空时，才在改代码前从 `base` 拉出 `pattern`。不在主干上代为提交。

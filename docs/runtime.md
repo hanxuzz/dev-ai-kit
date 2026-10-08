@@ -18,7 +18,7 @@ Windows：
 
 `install.ps1` 会在结束时自己再跑一次 `validate.ps1`。
 
-## 路径怎么算
+`runtime` 里启动命令、测试命令或 `database.readonly` 为空，是正常状态。套件不为此启动服务，也不连接数据库。本地怎么跑、DEV 只读库以业务仓已有规则为准。口令不写进 `project.yaml` 或需求文档。只有用户这次明确要跑测试或连库，并且对应字段已经填好，才执行。
 
 `project.yaml` 不写本机绝对路径。
 

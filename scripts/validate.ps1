@@ -119,6 +119,12 @@ if ($docsRoot -and (Test-Path -LiteralPath $docsRoot)) {
       if ($questionValues -notcontains $questions) { Add-Fail 'bad-questions' "$id questions=$questions" }
       if ($stageFile.ContainsKey($stage)) {
         $need = $stageFile[$stage]
+        $role = ''
+        if ($need -eq '04-requirement.md') { $role = 'requirement' }
+        elseif ($need -eq '05-impact.md') { $role = 'impact' }
+        elseif ($need -eq '06-plan.md') { $role = 'plan' }
+        elseif ($need -eq '07-testcases.md') { $role = 'testcases' }
+        if ($role) { $need = Get-RoleFileName $status $role $need }
         if (-not (Test-Path -LiteralPath (Join-Path $dir $need))) {
           Add-Fail 'missing-artifact' "$id stage=$stage missing $need"
         }
@@ -135,11 +141,15 @@ if ($docsRoot -and (Test-Path -LiteralPath $docsRoot)) {
         }
       }
       elseif ($afterRequirement -contains $stage) {
-        if (-not (Test-Path -LiteralPath (Join-Path $dir '04-requirement.md'))) {
-          Add-Fail 'missing-artifact' "$id missing 04-requirement.md"
+        $reqName = Get-RoleFileName $status 'requirement' '04-requirement.md'
+        if (-not (Test-Path -LiteralPath (Join-Path $dir $reqName))) {
+          Add-Fail 'missing-artifact' "$id missing $reqName"
         }
-        if (@('impact', 'plan', 'build', 'test', 'done') -contains $stage -and -not (Test-Path -LiteralPath (Join-Path $dir '05-impact.md'))) {
-          Add-Fail 'missing-artifact' "$id missing 05-impact.md"
+        if (@('impact', 'plan', 'build', 'test', 'done') -contains $stage) {
+          $impactName = Get-RoleFileName $status 'impact' '05-impact.md'
+          if (-not (Test-Path -LiteralPath (Join-Path $dir $impactName))) {
+            Add-Fail 'missing-artifact' "$id missing $impactName"
+          }
         }
       }
       $blocker = [string]$status.blocker

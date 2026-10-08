@@ -9,7 +9,9 @@ alwaysApply: true
 
 仅当用户在办安装、项目背景、录屏、需求资料、需求整理、影响点、开发顺序、按计划改代码、测试、提交，或在问下一步、还差什么、不知道做什么时，才读取套件并按对应技能执行。其他编程问题直接处理，沿用业务仓自己的说明。
 
-用户问下一步，或一个阶段做完时，先运行 `project.local.yaml` 里 `kit.path` 下的 `scripts/next.ps1 -Workspace` 当前工作区。以工作区 `.cursor/next-step.txt` 为准，并按 `skills/flow-next/SKILL.md` 把「下一步就做这一句」告诉用户。规范还没确认时，可以整理材料和接上已有需求。要建分支或改业务代码时，先读 `kit.path` 下的 `skills/flow-conventions/SKILL.md`。
+`conventions.branch.enabled` 默认是 `false`。不要因为远程默认分支显示 `main` 就建 `feature/{id}`。仓库已有分支做法时按仓库做。已有 Spec 和计划不要改名，写进该需求 `status.yaml` 的 `files.requirement`、`files.impact`、`files.plan`。`runtime` 为空时不启动服务、不连库。
+
+用户问下一步，或一个阶段做完时，先运行 `project.local.yaml` 里 `kit.path` 下的 `scripts/next.ps1 -Workspace` 当前工作区。以工作区 `.cursor/next-step.txt` 为准，并按 `skills/flow-next/SKILL.md` 把「下一步就做这一句」告诉用户。规范还没确认时，可以整理材料和接上已有需求。要建分支或改业务代码时，先读 `kit.path` 下的 `skills/flow-conventions/SKILL.md`，把项目已有规范收集到文档根 `team/conventions.md`。已有规范以那份收集和仓库原文为准。
 
 开始写需求文件或改业务代码之前，运行 `kit.path` 下的 `scripts/validate.ps1`。失败就停。技能正文在 `kit.path` 下的 `skills/`。文档冲突时以 `kit.path` 下的 `docs/trust.md` 为准。用户说「做第 N 步」时读 `skills/flow-implement/SKILL.md`，并遵守 `docs/code-style.md`。代码仓已有规范时以代码仓为准。
 

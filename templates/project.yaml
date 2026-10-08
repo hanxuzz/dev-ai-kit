@@ -32,7 +32,8 @@ secrets:
 conventions:
   confirmed: false
   branch:
-    enabled: true
+    # 默认关掉。仓库已有分支做法时以仓库为准，套件不另建 feature/{id}。
+    enabled: false
     base: ""
     pattern: "feature/{id}"
   commit:

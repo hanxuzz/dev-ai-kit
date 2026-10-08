@@ -19,14 +19,15 @@
 
 | 文档 | 角色 |
 |------|------|
-| 各代码仓的 `AGENTS.md`、`README` | 项目红线：命令、分支、禁止的依赖和已知陷阱 |
+| 各代码仓的 `AGENTS.md`、`.cursor/rules`、`CONTRIBUTING.md` | 项目规范的原文。分支、提交、推送以这些为准 |
+| 文档根 `team/conventions.md` | 上面这些原文的收集整理。套件读这一份，不改写原文 |
 | `05-impact.md` | 代码事实：路径和现状。写「要改」的路径必须在仓库里存在；写「新增」的路径可以还不存在 |
 | `04-requirement.md` | 确认后的范围，含「不做」。开发顺序和改动不得超出这里 |
 | `06-plan.md` | 执行清单。任务若超出 `04` 的「不做」，标成不执行，不要做 |
 | `01-meeting.md`、`02-sources.md` | 来源。和已确认的 `04` 冲突时，以 `04` 为准；还没确认时，写进 `03-questions.md` 并停住 |
 | `07-testcases.md` | 怎么验收。对不上 `runtime` 里已有命令的条目标 `manual` |
 
-三份核心文件是 `04-requirement.md`、`05-impact.md`、`06-plan.md`。做实现时缺任何一份，或正文少于一两句，就停止，不要凭会议记录补需求。
+三份核心材料是需求、影响点、开发顺序。默认文件名是 `04-requirement.md`、`05-impact.md`、`06-plan.md`。目录里已经有 Spec 或计划时，把文件名写进 `status.yaml` 的 `files.requirement`、`files.impact`、`files.plan`，不要另建三份空文档。做实现时，指向的文件缺一份，或正文少于一两句，就停止。
 
 `project.local.yaml` 的 `current` 为空，且需求目录多于一个时，先问用户做哪一条，不要自己选第一个。
 

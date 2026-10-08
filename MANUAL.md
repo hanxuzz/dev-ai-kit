@@ -66,4 +66,4 @@ blocker: ""
 
 ## 6. 提交
 
-你没有明确说提交时，不会提交，也不会推送。进入 `project.yaml` 里点名的那个代码目录再执行 git。该仓库已有的提交规则优先。`conventions.confirmed` 还不是 `true` 时不建分支、不改代码。确认之后，`branch.enabled` 为 `true` 才按 `branch.pattern` 建分支，并且不在主干上提交。`project.local.yaml`、录屏和转写过程不提交。
+你没有明确说提交时，不会提交，也不会推送。进入 `project.yaml` 里点名的那个代码目录再执行 git。该仓库已有的提交规则优先。`conventions.confirmed` 还不是 `true` 时不建分支、不改代码。确认之后，只有 `branch.enabled` 为 `true` 才建分支；默认是关掉的，避免和「从 `prod` 开功能分支再 cherry-pick、不代 push」冲突。`runtime` 留空时不启动、不连库。`project.local.yaml`、录屏和转写过程不提交。

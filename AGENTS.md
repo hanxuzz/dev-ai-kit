@@ -9,7 +9,7 @@
 ## 先读什么
 
 1. 工作区根的 `project.yaml` 和 `project.local.yaml`。套件路径是 `kit.path`，当前需求号是 `current`。机器路径只放在 `project.local.yaml`。
-2. `<kit.path>/docs/layout.md`、`docs/runtime.md`、`docs/trust.md`、`docs/conventions.md`。`project.yaml` 里 `conventions.confirmed` 不是 `true` 时，先按 `skills/flow-conventions/SKILL.md` 确认开关，不要建分支，不要改业务代码。业务仓已有 `AGENTS.md` 时，代码、分支和提交以那份为准；套件只加需求阶段门禁，不改写那份文件。
+2. `<kit.path>/docs/layout.md`、`docs/runtime.md`、`docs/trust.md`、`docs/conventions.md`。`project.yaml` 里 `conventions.confirmed` 不是 `true` 时，先按 `skills/flow-conventions/SKILL.md` 收集项目已有规范，写进文档根 `team/conventions.md`，再请用户确认。业务仓已有 `AGENTS.md` 或 `.cursor/rules` 时，分支和提交以那些原文为准；套件只整理，不改写那些文件。确认前不要建分支，不要改业务代码。
 3. 文档根里的 `team/background.md`，以及 `current` 指向的 `status.yaml`。
 
 找不到 `kit.path` 就停止。请用户在当前对话发送 https://github.com/hanxuzz/dev-ai-kit ，并按 `bootstrap/SKILL.md` 安装。不要要求把 `skill.md` 复制进业务项目。

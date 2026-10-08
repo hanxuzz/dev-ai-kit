@@ -157,36 +157,47 @@ $kitNames = @(
 )
 $existingFiles = @(Get-ChildItem -LiteralPath $dir -File | Where-Object { $kitNames -notcontains $_.Name })
 if ($existingFiles.Count -gt 0 -and -not (Test-Path -LiteralPath (Join-Path $dir '02-sources.md'))) {
-  Emit '还差：这个需求目录里已有材料，还没有收进 02-sources.md。'
-  $existingFiles | Select-Object -First 8 | ForEach-Object { Emit "- $($_.Name)" }
-  Say '把这些已有文件收成 02-sources.md。只追加摘录，不要改名，不要覆盖原文件。没有录屏就不要写 01-meeting.md。'
-  exit 0
+  $mapped = $false
+  $pre = Read-SimpleYaml (Join-Path $dir 'status.yaml')
+  foreach ($role in @('requirement', 'impact', 'plan')) {
+    if (Get-RoleFileName $pre $role '') { $mapped = $true }
+  }
+  if (-not $mapped) {
+    Emit '还差：这个需求目录里已有材料，还没对上套件要读的文件。'
+    $existingFiles | Select-Object -First 8 | ForEach-Object { Emit "- $($_.Name)" }
+    Say '不要改名，也不要新建空的 04、05、06。在 status.yaml 里把已有 Spec 填到 files.requirement，把影响点填到 files.impact，把开发计划填到 files.plan。没有的那一项再写。链接摘录可以另收进 02-sources.md。'
+    exit 0
+  }
 }
 
 $steps = @(
-  @{ File = '01-meeting.md'; Say = '解析这个需求的录屏。没有录像就改说：先收资料，把链接发给我。' }
-  @{ File = '02-sources.md'; Say = '把需求方给的链接、Figma、Confluence 或 PDF 收进这个需求。没有材料就直接说：没有外部资料，对照代码整理需求。' }
-  @{ File = '04-requirement.md'; Say = '对照现在的代码整理这个需求。有对不上的地方先写成问题，不要写开发顺序。' }
-  @{ File = '05-impact.md'; Say = '对照现在的代码整理这个需求。有对不上的地方先写成问题，不要写开发顺序。' }
-  @{ File = '06-plan.md'; Say = '写出开发顺序。' }
-  @{ File = '07-testcases.md'; Say = '整理测试用例。能自动跑的标 auto，不能跑的标 manual。每条需求都要有用例，或写明为什么不测。' }
+  @{ Role = ''; File = '01-meeting.md'; Say = '解析这个需求的录屏。没有录像就改说：先收资料，把链接发给我。' }
+  @{ Role = ''; File = '02-sources.md'; Say = '把需求方给的链接、Figma、Confluence 或 PDF 收进这个需求。没有材料就直接说：没有外部资料，对照代码整理需求。' }
+  @{ Role = 'requirement'; File = '04-requirement.md'; Say = '不要新建空的 04-requirement.md。若目录里已有 Spec，把它的文件名写入 status.yaml 的 files.requirement。还没有成文需求时，再对照现在的代码整理。有对不上的地方先写成问题，不要写开发顺序。' }
+  @{ Role = 'impact'; File = '05-impact.md'; Say = '不要新建空的 05-impact.md。若影响点已经写在现有文档里，把文件名写入 status.yaml 的 files.impact。还没有就对照现在的代码整理。有对不上的地方先写成问题，不要写开发顺序。' }
+  @{ Role = 'plan'; File = '06-plan.md'; Say = '不要新建空的 06-plan.md。若开发顺序已经写在现有计划里，把文件名写入 status.yaml 的 files.plan。还没有再写出开发顺序。' }
+  @{ Role = 'testcases'; File = '07-testcases.md'; Say = '整理测试用例。能自动跑的标 auto，不能跑的标 manual。每条需求都要有用例，或写明为什么不测。' }
 )
 
+$reqStatus = Read-SimpleYaml (Join-Path $dir 'status.yaml')
 foreach ($step in $steps) {
-  if (-not (Test-Path -LiteralPath (Join-Path $dir $step.File))) {
-    Emit "还差：还没有 $($step.File)。"
+  $fileName = $step.File
+  if ($step.Role) { $fileName = Get-RoleFileName $reqStatus $step.Role $step.File }
+  if (-not (Test-Path -LiteralPath (Join-Path $dir $fileName))) {
+    Emit "还差：还没有 $fileName。"
     if ($later.Count -gt 0) { Emit '还可以稍后做：'; $later | ForEach-Object { Emit "- $_" } }
     Say $step.Say
     exit 0
   }
 }
 
-$planPath = Join-Path $dir '06-plan.md'
+$planName = Get-RoleFileName $reqStatus 'plan' '06-plan.md'
+$planPath = Join-Path $dir $planName
 $planText = [System.IO.File]::ReadAllText($planPath)
 if ($planText -match '(?m)^- \[ \]') {
   if ($confirmed -ne 'true') {
     Emit '还差：要改代码了，但分支和提交规范还没按这个仓库确认。'
-    Say '对照各代码仓现在的分支和已有的 AGENTS.md，告诉我哪些规范打开、哪些关掉。确认前不要建分支，也不要改代码。'
+    Say '先收集各代码仓已有的 AGENTS.md 和规则，整理进 team/conventions.md。项目已有的分支做法保持不动，不要建分支，也不要改代码。'
     exit 0
   }
   $branchOn = ''

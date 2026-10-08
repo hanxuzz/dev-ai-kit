@@ -21,6 +21,7 @@
   team/
     README.md
     background.md
+    conventions.md
     glossary.md
     map.md
     roles.md
@@ -47,13 +48,19 @@ title: ""
 stage: intake
 questions: none
 blocker: ""
+files:
+  requirement: ""
+  impact: ""
+  plan: ""
 ```
+
+`files` 里某项非空时，那一项指向本目录已有文件，不要再复制一份空的 `04` / `05` / `06`。三项都空时，才用 `04-requirement.md`、`05-impact.md`、`06-plan.md`。校验和「按计划改代码」认这个指向。
 
 `stage` 只用：`intake`、`meeting`、`sources`、`questions`、`requirement`、`impact`、`plan`、`build`、`test`、`done`。
 
 `questions` 只用：`open`、`none`、`confirmed`。
 
-`questions: open` 时，`stage` 必须是 `questions`，并且目录里不得出现 `04-requirement.md`、`05-impact.md`、`06-plan.md`。`scripts/validate.ps1` 会检查这件事。
+`questions: open` 时，`stage` 必须是 `questions`，并且目录里不得出现套件新建的 `04-requirement.md`、`05-impact.md`、`06-plan.md`。已有材料通过 `files` 指向，不算新建。`scripts/validate.ps1` 会检查这件事。
 
 `blocker` 为空表示没有工具故障。转写失败、录像未同步这类原因写在这里，不要写成会议结论。
 
@@ -64,9 +71,9 @@ blocker: ""
 | meeting | `01-meeting.md` |
 | sources | `02-sources.md` |
 | questions | `03-questions.md` |
-| requirement | `04-requirement.md` |
-| impact | `05-impact.md` |
-| plan / build | `06-plan.md` |
+| requirement | `files.requirement`，否则 `04-requirement.md` |
+| impact | `files.impact`，否则 `05-impact.md` |
+| plan / build | `files.plan`，否则 `06-plan.md` |
 | test / done | `07-testcases.md` |
 
 ## 共享目录

@@ -8,20 +8,17 @@ description: >-
 
 按 `docs/runtime.md` 做开始检查，并读 `docs/trust.md`。
 
-`questions` 为 `open`，或 `06-plan.md` 不存在时，停止，不要改业务代码。
+`questions` 为 `open` 时停止，不要改业务代码。需求、影响点、开发顺序按 `status.yaml` 的 `files.requirement`、`files.impact`、`files.plan` 找；这三项为空才用 `04-requirement.md`、`05-impact.md`、`06-plan.md`。指向的文件不存在时停止，并说明把已有 Spec 和计划写进 `files`，不要另建空文档。
 
-`project.yaml` 的 `conventions.confirmed` 不是 `true` 时，停止，改走 `skills/flow-conventions/SKILL.md`。
+`project.yaml` 的 `conventions.confirmed` 不是 `true` 时，停止，改走 `skills/flow-conventions/SKILL.md`。`branch.enabled` 不是 `true` 时不要建分支。`runtime` 为空不阻止改代码，也不要为此启动服务或连接数据库。
 
 ## 开始前
 
 1. `current` 指向的需求不明确，或目录多于一个：让用户选定，不要默认第一个。
-2. 读该代码仓的 `AGENTS.md`（没有就读 `README`）。把红线列在对话里。没有这类文件就说明「无项目约定」，改代码时再读套件 `docs/code-style.md`。项目里已有的写法优先于这份说明。
-3. 读 `06-plan.md`。用户点名的任务若标了「不执行」，跳过并说明原因。
+2. 读该代码仓的 `AGENTS.md`（没有就读 `README`）和文档根 `team/conventions.md`。分支、提交按这两处，不按套件默认分支名。把红线列在对话里。没有这类文件就说明「无项目约定」，改代码时再读套件 `docs/code-style.md`。项目里已有的写法优先于这份说明。
+3. 读 `files.plan` 指向的计划（空则读 `06-plan.md`）。用户点名的任务若标了「不执行」，跳过并说明原因。
 4. 用户没点名任务时，只做第一个未勾选的任务，然后停下。
-5. 分支：`conventions.branch.enabled` 为 `true` 时，先处理分支再改文件。分支名用 `pattern`，把 `{id}` 换成需求号。`base` 为空就停止并问主干，不要猜。
-   - 该任务要改的那个仓库里，若已在这条分支上，继续。
-   - 没有这条分支：工作区干净时从 `base` 建出来并切过去。有未提交改动就停，问用户怎么处理。
-   - `enabled` 不是 `true` 时，不新建分支。当前分支是 `base`、`main` 或 `master` 时，先告诉用户，等用户点名可以在这个分支改，再动代码。
+5. 分支：`conventions.branch.enabled` 为 `true` 且 `base` 非空时，才处理分支。`enabled` 不是 `true` 时，不新建、不切换分支，停在用户当前分支上改。不要因为远程默认分支是 `main` 就从 `main` 建 `feature/{id}`。
 
 ## 改代码
 

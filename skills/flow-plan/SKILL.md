@@ -8,7 +8,7 @@ description: >-
 
 按 `docs/runtime.md` 做开始检查，并读 `docs/trust.md`。`questions` 为 `open` 时停止，不要创建 `06-plan.md`。
 
-`04-requirement.md` 或 `05-impact.md` 不存在，或正文过短、仍是空模板时，停止。不要凭会议记录补任务。
+需求正文和影响点先看 `status.yaml` 的 `files.requirement`、`files.impact`。这两项为空才看 `04-requirement.md`、`05-impact.md`。指向的文件不存在，或正文过短、仍是空模板时，停止。不要凭会议记录补任务，也不要另建一份空的 `06` 盖住已有计划。`files.plan` 已指向一份现有计划时，补进那份文件，不要再复制模板。
 
 从模板写 `06-plan.md`。对照 `docs/practices.md`：有 `R` 写不出「则」，或 `questions` 仍是 `open`，就不要创建这份文件。
 
