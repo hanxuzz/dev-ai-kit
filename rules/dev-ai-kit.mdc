@@ -5,7 +5,9 @@ alwaysApply: true
 
 本工作区已安装 dev-ai-kit。套件路径、共享目录和当前需求号在工作区根的 `project.local.yaml`。文档放哪、状态机和文件名以套件的 `docs/layout.md`、`docs/runtime.md` 为准。
 
-仅当用户在办安装、项目背景、录屏、需求资料、需求整理、影响点、开发顺序、按计划改代码、测试、提交，或在问下一步、还差什么、不知道做什么时，才读取套件并按对应技能执行。其他编程问题直接处理。
+两套说明同时在时：业务仓根目录的 `AGENTS.md`、已有 `.cursor/rules`、`.agents/skills` 管代码怎么改、分支怎么开、提交怎么做。套件只在办需求流程时加门禁：问题没确认不能写 `04`/`05`/`06`，也不能改业务代码。业务仓更严的红线照业务仓。套件不改写已有的 `AGENTS.md`。
+
+仅当用户在办安装、项目背景、录屏、需求资料、需求整理、影响点、开发顺序、按计划改代码、测试、提交，或在问下一步、还差什么、不知道做什么时，才读取套件并按对应技能执行。其他编程问题直接处理，沿用业务仓自己的说明。
 
 用户问下一步，或一个阶段做完时，先运行 `project.local.yaml` 里 `kit.path` 下的 `scripts/next.ps1 -Workspace` 当前工作区。以工作区 `.cursor/next-step.txt` 为准，并按 `skills/flow-next/SKILL.md` 把「下一步就做这一句」告诉用户。`conventions.confirmed` 不是 `true` 时，先读 `kit.path` 下的 `skills/flow-conventions/SKILL.md`，不要建分支，不要改业务代码。
 

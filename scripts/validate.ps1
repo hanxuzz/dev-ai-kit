@@ -54,7 +54,7 @@ if ($project.docs) {
   $mode = [string]$project.docs.mode
   $path = [string]$project.docs.path
 }
-if ($mode -notin @('local', 'share', 'repo')) {
+if ($mode -notin @('local', 'share', 'repo', 'tracked')) {
   Add-Fail 'docs-mode' "got '$mode'"
 }
 $docsRoot = Resolve-DocsRoot $Workspace $project $local
@@ -68,7 +68,10 @@ else {
   $docsRoot = (Resolve-Path -LiteralPath $docsRoot).Path
   $gitRoot = Get-GitRoot $docsRoot
   if ($mode -eq 'local' -and $gitRoot) {
-    Add-Fail 'docs-inside-git' "$docsRoot is inside $gitRoot. Use mode repo or share, or move docs out of the code repository."
+    Add-Fail 'docs-inside-git' "$docsRoot is inside $gitRoot. Use mode tracked when this git repo already commits docs."
+  }
+  if ($mode -eq 'tracked' -and -not $gitRoot) {
+    Add-Fail 'docs-not-tracked' "$docsRoot is not inside a git repo. Use mode local, share, or repo."
   }
   if ($mode -eq 'repo' -and -not $gitRoot) {
     Add-Fail 'docs-repo-not-git' $docsRoot
@@ -94,15 +97,19 @@ $stageFile = @{
 }
 $afterRequirement = @('requirement', 'impact', 'plan', 'build', 'test', 'done')
 
+$current = ''
+if ($local.current) { $current = [string]$local.current }
+
 if ($docsRoot -and (Test-Path -LiteralPath $docsRoot)) {
-  $reqRoot = Join-Path $docsRoot 'requirements'
-  if (Test-Path -LiteralPath $reqRoot) {
+  $reqRoot = Resolve-RequirementsRoot $docsRoot $project
+  if ($reqRoot -and (Test-Path -LiteralPath $reqRoot)) {
     Get-ChildItem -LiteralPath $reqRoot -Directory | ForEach-Object {
       $dir = $_.FullName
       $id = $_.Name
       $statusPath = Join-Path $dir 'status.yaml'
       if (-not (Test-Path -LiteralPath $statusPath)) {
-        Add-Fail 'no-status' $id
+        if ($current -eq $id) { Add-Fail 'no-status' $id }
+        else { Add-Warn 'no-status' "$id has files but no status.yaml yet" }
         return
       }
       $status = Read-SimpleYaml $statusPath
@@ -141,11 +148,10 @@ if ($docsRoot -and (Test-Path -LiteralPath $docsRoot)) {
   }
 }
 
-$current = ''
-if ($local.current) { $current = [string]$local.current }
 if ($current -and $docsRoot -and (Test-Path -LiteralPath $docsRoot)) {
-  $currentDir = Join-Path $docsRoot "requirements\$current"
-  if (-not (Test-Path -LiteralPath $currentDir)) {
+  $reqRoot = Resolve-RequirementsRoot $docsRoot $project
+  $currentDir = Join-Path $reqRoot $current
+  if (-not $reqRoot -or -not (Test-Path -LiteralPath $currentDir)) {
     Add-Fail 'current-missing' $current
   }
 }

@@ -36,6 +36,17 @@ function Read-SimpleYaml {
   return $root
 }
 
+function Resolve-RequirementsRoot {
+  param($DocsRoot, $Project)
+  $name = 'requirements'
+  if ($Project.docs -and $Project.docs.requirements_dir) {
+    $name = [string]$Project.docs.requirements_dir
+  }
+  if (-not $name) { $name = 'requirements' }
+  if ($name -match '[\\/]' -or $name -eq '.' -or $name -eq '..') { return $null }
+  return (Join-Path $DocsRoot $name)
+}
+
 function Resolve-DocsRoot {
   param($Workspace, $Project, $Local)
   $mode = [string]$Project.docs.mode

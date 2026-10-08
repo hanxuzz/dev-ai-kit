@@ -24,11 +24,14 @@ Windows：
 
 | `docs.mode` | 文档根 |
 |-------------|--------|
-| `local` | `<工作区>/<docs.path>`，且不能落在任何一个代码仓的 git 目录里面 |
+| `local` | `<工作区>/<docs.path>`，且不能落在任何一个 git 目录里面。只用于工作区本身不是 git 仓库 |
+| `tracked` | `<工作区>/<docs.path>`，跟这个工作区一起提交。父仓库自己有 `.git`，文档本来就在里面时用这个 |
 | `share` | `<project.local.yaml 的 share.path>/<docs.path>` |
-| `repo` | `<工作区>/<docs.path>`，并且这里本身是 git 仓库 |
+| `repo` | `<工作区>/<docs.path>`，并且这里本身是另一个 git 仓库 |
 
-工作区根如果自己就是一个代码仓（里面有 `.git`），安装直接失败。要打开的是同时包含前后端的父文件夹。
+工作区自己有 `.git`，同时下面还有代码目录时，可以安装。只打开某一个代码仓、下面没有代码目录时，安装失败。
+
+需求目录是 `<文档根>/<docs.requirements_dir>/<需求号>/`。已经有 `requirement` 而没有 `requirements` 时，安装把 `requirements_dir` 记成 `requirement`，不另建空目录。
 
 ## 当前需求
 

@@ -17,7 +17,7 @@
 
 ```text
 <文档根>/
-  README.md                 # 写明 mode，以及 local 时不要提交
+  README.md                 # 新建的文档根才写。已有文档目录时不覆盖
   team/
     README.md
     background.md
@@ -25,7 +25,7 @@
     map.md
     roles.md
     decisions.md
-  requirements/
+  <requirements_dir>/       # 默认 requirements。已有 requirement/ 时用现有目录名
     <需求号>/
       status.yaml
       01-meeting.md
@@ -37,7 +37,7 @@
       07-testcases.md
 ```
 
-需求号：有工单号用工单号；否则 `REQ-YYYYMMDD-短名`。短名用小写英文和连字符。
+需求号：有工单号用工单号；否则 `REQ-YYYYMMDD-短名`。短名用小写英文和连字符。目录里已有别的文件时，接上这个需求号，只在缺 `status.yaml` 时补它，不覆盖原文件，不另建一套空目录。
 
 ## status.yaml
 

@@ -11,7 +11,7 @@ description: >-
 
 ## 原件
 
-PPT、PDF、图片只放到 `<共享目录>/requirements/<需求号>/`。`share.path` 为空：不要把二进制拷进代码仓。在 `02-sources.md` 记录用户给出的路径，并说明要先填写 `share.path`。复制失败或路径不存在时写入 `blocker`，状态标「未收集」，停止。
+PPT、PDF、图片只放到 `<共享目录>/requirements/<需求号>/`。`share.path` 为空：不要把二进制拷进代码仓。在 `02-sources.md` 记录用户给出的路径，并说明要先填写 `share.path`。复制失败或路径不存在时写入 `blocker`，状态标「未收集」，停止。需求目录里已经有的文件留在原地，摘录进 `02-sources.md`，不要改名，不要覆盖。
 
 ## 摘录
 

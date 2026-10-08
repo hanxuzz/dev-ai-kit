@@ -8,9 +8,11 @@ repos:
   backend: backend
 
 docs:
-  # repo | share | local
+  # repo | share | local | tracked
+  # tracked：文档跟当前这个 git 仓库一起提交。父仓库里已有 docs/ 时用这个。
   mode: local
   path: docs
+  requirements_dir: requirements
 
 runtime:
   backend:

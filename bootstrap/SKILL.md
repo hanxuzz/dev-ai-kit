@@ -27,18 +27,19 @@ disable-model-invocation: true
 
 ## 2. 确认工作区
 
-Cursor 打开的必须是包含前后端的父文件夹，不能是某一个代码仓本身。父文件夹里要有带 `.git` 或构建文件的子目录。没有就停，请用户先克隆代码。
+Cursor 打开的是包含前后端的那一层。这一层自己可以是 git 仓库，只要下面还有 `service/`、`ui/` 或其他代码目录。只打开其中某一个代码仓、里面没有下一层代码目录时，安装会停。
 
-列出这些子目录，请用户确认哪个是前端、哪个是后端。名字已经是 `frontend` / `backend` 时可以直接采用。
+列出这些子目录，请用户确认哪个是前端、哪个是后端。名字已经是 `frontend` / `backend`，或 `ui` / `service` 时可以直接采用。不要改写工作区已有的 `AGENTS.md`。
 
 ## 3. 决定文档去处
 
 按顺序，用户已经表态的不要再问：
 
 1. 工作区里有名为 `docs` 的 git 仓库：`-DocsMode repo`。文档库文件夹不叫 `docs` 时，加上 `-DocsRepo <文件夹名>`。不要把名字里只是含有 doc 的目录当成文档库。
-2. 没有文档库：询问 OneDrive 共享目录的本机路径。有则 `-DocsMode share -SharePath <路径>`。说明共享目录用来同步录屏、架构图和给需求方看的问题清单。
-3. 都没有：`-DocsMode local`。告诉用户整理结果在工作区的 `docs/`，不提交；只克隆前后端时拿不到这些文件。
-4. `project.yaml` 已经存在时，安装脚本不会改 `docs.mode`。用户要换去处就编辑该文件，不要靠再跑一次安装来改。
+2. 没有单独的文档库，但工作区自己是 git 仓库，文档就在里面：`-DocsMode tracked`。已有 `docs/requirement/` 这类目录时，安装会记成 `requirements_dir`，不会另建 `docs/requirements/`，也不会把 `/docs/` 写进 `.gitignore`。
+3. 工作区不是 git 仓库：询问 OneDrive 共享目录的本机路径。有则 `-DocsMode share -SharePath <路径>`。
+4. 都没有：`-DocsMode local`。整理结果在工作区的 `docs/`，不提交。
+5. `project.yaml` 已经存在时，安装脚本不会改 `docs.mode`。用户要换去处就编辑该文件，不要靠再跑一次安装来改。
 
 ## 4. 运行安装脚本
 

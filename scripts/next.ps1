@@ -94,7 +94,12 @@ if (-not $runtimeTest -or -not $runtimeStart) {
   $later.Add('启动命令或测试命令还是空的。要自测时再填 project.yaml 的 runtime，不要现在连数据库。')
 }
 
-$reqRoot = Join-Path $docsRoot 'requirements'
+$reqRoot = Resolve-RequirementsRoot $docsRoot $project
+if (-not $reqRoot) {
+  Emit '还差：requirements_dir 不是一个目录名。'
+  Say '把 project.yaml 里的 docs.requirements_dir 改成 requirement 或 requirements，不要写路径。'
+  exit 0
+}
 $dirs = @()
 if (Test-Path -LiteralPath $reqRoot) {
   $dirs = @(Get-ChildItem -LiteralPath $reqRoot -Directory)
@@ -102,6 +107,12 @@ if (Test-Path -LiteralPath $reqRoot) {
 $current = ''
 if ($local.current) { $current = [string]$local.current }
 
+if (-not $current -and $dirs.Count -gt 0) {
+  Emit '已经有需求目录，不要另起一套空目录。'
+  $dirs | ForEach-Object { Emit "- $($_.Name)" }
+  Say '接上已有需求，告诉我需求号。不要新建目录，也不要覆盖里面的文件。'
+  exit 0
+}
 if ($dirs.Count -eq 0 -or -not $current) {
   Emit '已经有：安装配置和项目背景。'
   Emit '还差：还没有一条正在做的需求。'
@@ -139,6 +150,18 @@ if ($questions -eq 'open') {
   Emit '还差：问题清单还没经需求方确认。现在不能写开发顺序，也不能改代码。'
   Emit "请把 $dir\03-questions.md 给需求方看。有共享目录时，同一份应在共享目录里。"
   Say '需求方已确认。按确认结果更新需求和影响点。'
+  exit 0
+}
+
+$kitNames = @(
+  'status.yaml', '01-meeting.md', '02-sources.md', '03-questions.md',
+  '04-requirement.md', '05-impact.md', '06-plan.md', '07-testcases.md'
+)
+$existingFiles = @(Get-ChildItem -LiteralPath $dir -File | Where-Object { $kitNames -notcontains $_.Name })
+if ($existingFiles.Count -gt 0 -and -not (Test-Path -LiteralPath (Join-Path $dir '02-sources.md'))) {
+  Emit '还差：这个需求目录里已有材料，还没有收进 02-sources.md。'
+  $existingFiles | Select-Object -First 8 | ForEach-Object { Emit "- $($_.Name)" }
+  Say '把这些已有文件收成 02-sources.md。只追加摘录，不要改名，不要覆盖原文件。没有录屏就不要写 01-meeting.md。'
   exit 0
 }
 

@@ -18,7 +18,7 @@ git -C <目录> rev-parse --abbrev-ref HEAD
 git -C <目录> symbolic-ref --short refs/remotes/origin/HEAD
 ```
 
-第二条没有输出就说明远程默认分支还不知道，问用户主干叫什么。再看该目录 `.cursor/rules/` 里有没有提交或分支规则。有的话列出来，并说明这些规则优先，套件开关不覆盖它们。
+第二条没有输出就说明远程默认分支还不知道，问用户主干叫什么。再看工作区根的 `AGENTS.md`，以及该目录 `.cursor/rules/` 里有没有提交或分支规则。有的话列出来，建议关掉 `branch.enabled`，并说明这些规则优先，套件开关不覆盖它们。
 
 ## 请用户逐项确认
 
