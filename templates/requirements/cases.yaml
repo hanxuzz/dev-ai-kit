@@ -1,0 +1,8 @@
+cases:
+  - id: T1
+    requirements: [R1]
+    repo: frontend
+    kind: manual
+    expected: "填写与 R1 一致的可观察结果"
+    # 自动用例改 kind: auto，并指定 runtime.checks 中的 check 名。
+    # check: frontend-unit

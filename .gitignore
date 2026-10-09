@@ -1,3 +1,7 @@
 .DS_Store
 Thumbs.db
 /project.local.yaml
+.venv/
+__pycache__/
+*.pyc
+.dev-ai-kit/

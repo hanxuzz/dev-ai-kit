@@ -1,14 +1,9 @@
 ---
-description: 套件默认的提交约束。业务仓已有 git 规则时以业务仓为准，不要覆盖。
+description: 套件默认 Git 约束；项目现有更严规则仍有效
 alwaysApply: true
 ---
 
-用户没有明确说提交时，不要 `git commit`。没有明确说推送时，不要 `git push`。
-
-不要提交：密钥、`.env`、`project.local.yaml`、录屏、转写全文、抽帧、wav、OneDrive 里的原件。
-
-不要改 git config，不要使用 `--no-verify`，不要 force push。
-
-业务仓 `.cursor/rules/` 里已有的 git 规则优先于本文件。
-
-分支按工作区 `project.yaml` 的 `conventions`。`branch.enabled` 不是 `true` 时，不要建分支，也不要按 `feature/{id}` 切换；分支怎么开以业务仓已有规则为准。`enabled` 为 `true` 且 `base` 非空时，才在改代码前从 `base` 拉出 `pattern`。不在主干上代为提交。
+提交和推送分别需要用户明确要求。不要 force push、绕过钩子或修改 Git 配置。
+不要提交凭证、本机 project.local.yaml、转写过程、未授权原件；仅选择本次相关文件。
+分支按项目已确认的 mode/allowed_pattern/base/pattern 判断；auto_create 只表示是否允许代操作，不表示当前分支一定正确。
+用户只要求完成任务不等于允许提交、推送或部署。

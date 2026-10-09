@@ -1,41 +1,39 @@
-# 可提交的项目配置示例。安装脚本会按这个结构生成，不会覆盖已有文件。
-# 本机绝对路径写在 project.local.yaml。口令不写在这里。
-
-project: psl
-
+# 团队可提交配置。机器绝对路径与凭证正文不得写入。
+schema_version: 2
+project: example
 repos:
   frontend: frontend
   backend: backend
-
 docs:
-  # repo | share | local | tracked
-  # tracked：文档跟当前这个 git 仓库一起提交。父仓库里已有 docs/ 时用这个。
   mode: local
   path: docs
   requirements_dir: requirements
-
 runtime:
-  backend:
-    start: ""
-  frontend:
-    start: ""
+  # 检查按需执行。没有 database 依赖的单元测试不要求连接数据库。
+  checks: {}
+  # 配置示例（先确认项目已有命令，再取消注释）：
+  # frontend-unit:
+  #   repo: frontend
+  #   argv: [npm, run, test, --, --run]
+  #   cwd: .
+  #   timeout_seconds: 120
+  #   requires: []
   database:
     readonly: false
     bitwarden: ""
-  test: ""
-
+  services: {}
 secrets:
-  # Bitwarden 文件夹名，例如 个人/psl。口令不写在这里。
   bitwarden_folder: ""
-
-# 先看 docs/conventions.md。confirmed 写成 true 之前，这些只是建议，不会自动建分支。
 conventions:
   confirmed: false
   branch:
-    # 默认关掉。仓库已有分支做法时以仓库为准，套件不另建 feature/{id}。
-    enabled: false
+    # project: 按团队 allowed_pattern 检查；current: 明确允许当前分支；feature: 按需求分支
+    mode: project
+    allowed_pattern: ""
     base: ""
     pattern: "feature/{id}"
+    # 是否代建分支与正确分支的判断分开。核心命令不自动执行 Git 写入。
+    auto_create: false
   commit:
     only_when_asked: true
     allow_on_base: false

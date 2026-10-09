@@ -1,0 +1,10 @@
+tasks:
+  - id: TASK-1
+    title: "填写一个可独立验证的任务"
+    repo: frontend
+    requirements: [R1]
+    depends_on: []
+    # 路径相对 repo，可用明确的 glob；避免用 ** 包含全部业务代码。
+    files: [src/example.ts]
+    checks: []
+    manual_acceptance: "无自动命令时，写明谁在什么环境按什么步骤验证"

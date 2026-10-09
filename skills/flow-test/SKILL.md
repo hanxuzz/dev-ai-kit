@@ -1,32 +1,17 @@
 ---
 name: flow-test
-description: >-
-  整理 07-testcases.md，并在 project.yaml 已配置时交给 Cursor 执行。
-  用户说写测试用例、自测、执行测试用例时使用。
+description: 按验收映射执行已有自动检查或记录真实人工结果，拒绝过期证据并完成用户验收。
 ---
 
-# 用例与执行
+# 验证与收工
 
-按 `docs/runtime.md` 做开始检查。`04-requirement.md` 不存在时只停止，不编造用例。
+通过 files.requirement 获取规格，不硬编码 04 文件名。cases.yaml 的每个 T 对应 R；测试方式依据实际覆盖能力。
+优先项目已有单元、组件、接口和集成测试；少量重要旅程才用完整 E2E，不为每条业务验收搭建浏览器全链路。
 
-## 整理
+自动项：确认 runtime.checks 的 argv、repo、cwd、超时及 requires。本轮用户授权执行后用 run。没有数据库依赖的命令不要求配置数据库；需要数据库时必须实际只读权限，不只信布尔值。
+人工项：真实执行者完成步骤后，用 manual --target case:T1 --result passed/failed/blocked --by ... --note ... 记录环境和观察。任务级人工验收使用 task:TASK-1。
 
-把需求里每条 `R` 的验收、测试人员给的步骤、以及影响点里可以核对的行为，写进 `07-testcases.md`（没有就从模板复制）。每条用例写上对应的 `R`。同一条 `R` 没有用例时，写进「未覆盖」并说明原因。每条标 `auto` 或 `manual`。
+命令失败、超时、执行期间代码变化都不是通过。历史结果、旧代码和旧需求版本的结果不算本次验证。代码或配置变化后重跑受影响检查；脚本当前保守地按仓库内容判断失效。
+输出默认仅保存摘要；需要排障时在授权范围内查看命令输出并脱敏，不把凭证写进需求或证据说明。
 
-`auto` 只对应项目里已经存在的测试命令，或 `project.yaml` 的 `runtime.test`。命令写不出来就标 `manual`。不要新造一套测试框架。
-
-## 执行前看配置
-
-读 `project.yaml` 的 `runtime`。
-
-| 字段 | 为空或不是 true 时 |
-|------|---------------------|
-| `backend.start` / `frontend.start` | 不启动。告诉用户要填的命令 |
-| `database.readonly` | 不是 `true` 就不连接数据库。说明需要一个没有写权限的账号，并把 Bitwarden 条目名填进 `runtime.database.bitwarden` |
-| `test` | 不跑测试命令。指出要填哪个字段 |
-
-口令只从 Bitwarden 读取，按 `skills/flow-bitwarden/SKILL.md`。不写进需求文档，也不写进命令输出粘贴。连接失败时把现象写入用例文末，并把 `blocker` 设为该现象，不反复重试登录。
-
-页面操作类用例：先按 `docs/dependencies.md` 检查 `agent-browser`。前置不齐就停，并指出技能和扩展所在目录。齐了再按该技能操作浏览器。
-
-只有拿到本轮命令的退出码和输出之后，才能把一条 `auto` 用例写成通过或失败。以前跑过的结果不算。没有退出码就保持未执行。失败时不改断言。同一条命令连续失败 3 次就停止，把现象写入 `blocker`。用户确认这轮自测结束后，把 `stage` 改为 `test` 并跑 `validate.ps1`。
+所有任务完成、所有用例在当前代码通过后，next 显示 accept；用户明确验收结束才 complete。manual 未执行不能当作通过，不能用删除用例绕过门禁。

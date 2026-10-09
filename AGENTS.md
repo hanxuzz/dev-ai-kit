@@ -1,50 +1,31 @@
-# AGENTS.md
+# dev-ai-kit Agent 约定
 
-给在业务工作区里工作的 Agent。套件仓库还差什么看 [PLAN.md](PLAN.md)。
+## 在本套件仓库开发时
 
-## 写套件文档时
+这里是流程套件源码，不是已安装的业务工作区。先读 README.md、docs/schema.md 和 docs/testing.md；不要求本仓有 project.yaml，不运行业务安装门禁。
+修改核心后运行 `python -m unittest discover -s tests -v`；解释性文档和技能必须与命令行为一致。
+不要把任何同事的机器目录写入可提交文件。本机路径仅放业务工作区不提交的 project.local.yaml。
 
-这是给同事用的仓库，不是某一个人的本机工具。说明、模板、技能里只出现仓库地址 https://github.com/hanxuzz/dev-ai-kit 。不要写入任何同事的用户目录、磁盘路径或「我这台电脑上的位置」。每人克隆到哪里，只记在该项目不提交的 `project.local.yaml`。
+## 在已安装的业务工作区使用时
 
-## 先读什么
+先读 project.yaml、project.local.yaml 和 kit.path 指向的 docs/runtime.md、docs/trust.md。
+状态/文件约定以 docs/schema.md 为准；每个技能的 `kit` 指该套件的 scripts/kit.sh 或 scripts/kit.ps1。
+找不到安装配置时先确认工作区，按 bootstrap/SKILL.md 安装，不复制 skill.md。
 
-1. 工作区根的 `project.yaml` 和 `project.local.yaml`。套件路径是 `kit.path`，当前需求号是 `current`。机器路径只放在 `project.local.yaml`。
-2. `<kit.path>/docs/layout.md`、`docs/runtime.md`、`docs/trust.md`、`docs/conventions.md`。安装之后先按 `skills/flow-conventions/SKILL.md` 收集项目已有规范，写入文档根 `team/conventions.md`，并请用户确认。用户补充的新规范也写进这一份，不改写仓库原文。`conventions.confirmed` 不是 `true` 时，不要建分支，不要改业务代码。
-3. 文档根里的 `team/background.md`，以及 `current` 指向的 `status.yaml`。
+- 查看进度只读 next/status，不构成执行授权。
+- 登记/接管用 adopt，可在缺 status 时恢复，不先要求就绪校验。
+- 开发前检查当前版本确认、任务依赖、团队规范和分支。questions=open 或 blocker 未解决不修改对应业务范围。
+- 需求范围、不做事项、验收必须能追溯到原件和 R/TASK/T 映射。视觉还原看设计，普通文字改动允许已确认文字来源。
+- 完成依赖实际证据；旧版本结果不能当本次通过。任务做完不会自动提交、推送或部署。
+- 单步授权做完就停，连续执行仅在明确授权的范围内推进。
+- 反馈默认只写当前任务、完成结果、阻塞和下一动作，完整看板按需展示。
 
-找不到 `kit.path` 就停止。请用户在当前对话发送 https://github.com/hanxuzz/dev-ai-kit ，并按 `bootstrap/SKILL.md` 安装。不要要求把 `skill.md` 复制进业务项目。
+## 技能路由
 
-写需求文件之前运行 `<kit.path>/scripts/validate.ps1 -Workspace <工作区>`。失败就停，把 `FAIL` 那一行告诉用户。
+登记与接管→flow-intake；来源→flow-meeting/flow-sources；范围与影响→flow-impact；任务→flow-plan；实施→flow-implement；验证→flow-test；进度→flow-next；变更→flow-change；交接→flow-handoff；规范→flow-conventions；提交→flow-git；凭证→flow-bitwarden。
+只解释代码或回答问题时直接处理，不强迫创建需求。
 
-用户不知道下一步，或本阶段做完时，运行 `<kit.path>/scripts/next.ps1 -Workspace <工作区>`，并运行 `<kit.path>/scripts/check.ps1`。每次回复都要有「套件进度」「技能安装」「请你确认」「请你做」「下一步」。`下一步由你来做` 要在本轮执行。改界面或交互前必须打开需求原件（Figma、截图、原型图），不能只按整理后的摘要开发。按任务改代码时，回复按 `skills/flow-implement/SKILL.md` 写全六块，并列出计划里每条任务的完成情况，不要收成一句做完了。
+## 凭证和外部操作
 
-## 什么时候用套件
-
-用户在办安装、项目背景、录屏、需求资料、需求整理、影响点、开发顺序、测试、提交时，按 `docs/layout.md` 的技能表去读 `<kit.path>/skills/` 里对应的 `SKILL.md`。
-
-问实现、改一个函数、查一段代码时，直接做。
-
-## 门禁
-
-`questions: open` 时，`stage` 必须是 `questions`。
-
-- 可以改 `03-questions.md`，并复制到共享目录里该需求的文件夹。
-- 禁止创建 `04-requirement.md`、`05-impact.md`、`06-plan.md`。
-- 禁止修改前后端业务代码，也禁止提交这些改动。
-
-用户没有明确说需求方已确认时，不要把 `questions` 改成 `confirmed`，不要写最终需求和影响点。
-
-`blocker` 非空时，先把这句话告诉用户。转写失败或文件还没同步时，不要写一份看起来完整的结论。
-
-## 文件怎么分工
-
-- 整理后的 Markdown 写到 `project.yaml` 的 `docs.mode` 所决定的文档根。算法见 `docs/runtime.md`。
-- 录屏、PPT、PDF、架构图原件放在共享目录的 `requirements/<需求号>/`，并登记在 `index.md`。
-- `asr-watch` 的 transcript、帧、wav 留在本机 `~/.local/share/asr-funasr/runs/<视频名>/`。
-- 密码和连接串不写进任何文件。只写 Bitwarden 条目名。
-
-## 能力边界
-
-- 转写只调用本机已安装的 `asr-watch`。
-- 浏览器操作只调用本机已安装的 `agent-browser`。缺插件或 MCP 时打开 `docs/dependencies.md`，停止。
-- `runtime.database.readonly` 不是 `true`，或启动命令、测试命令为空时，按 `skills/flow-test/SKILL.md` 告诉用户怎么填。不要启动项目，不要连数据库。
+凭证只用已授权的本机工具，文件仅记 Bitwarden 条目名。套件不代为登录、部署或改外部数据。
+缺少录像、浏览器或数据库能力只阻挡依赖它的步骤；不能因此伪造资料、验证或确认。

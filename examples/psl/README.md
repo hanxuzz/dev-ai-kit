@@ -1,15 +1,6 @@
-# 安装完成后的工作区（示例）
+# 旧版问题澄清示例
 
-`psl/` 本身可以不是 git 仓库。前后端各自有远程。套件不放在里面。
+这里保留 0.1 的资料格式，用于演示旧需求接管；不代表可直接执行的 v2 已确认需求。
 
-```text
-psl/
-  project.yaml
-  project.local.yaml           # 不提交
-  .cursor/rules/dev-ai-kit.mdc
-  frontend/                    # 业务仓库
-  backend/                     # 业务仓库
-  docs/                        # 仅 docs.mode=local 时出现，不提交
-```
-
-`docs.mode=repo` 时，`team/` 和 `requirements/` 在名为 `docs` 的文档库里，或在 `-DocsRepo` 指定的那个库里。`docs.mode=share` 时，它们在 OneDrive 共享目录的 `docs/` 下。原件在共享目录的 `requirements/<需求号>/`。
+将已有材料放入业务文档根后，用 adopt 预览并应用。旧 status 会备份，questions=open 保留；来源、任务和验收由 Agent 依据真实资料整理，不自动继承确认与完成。
+完整 v2 演练见 ../workflow/README.md。

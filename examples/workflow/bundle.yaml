@@ -1,0 +1,52 @@
+state:
+  title: 数值默认值修复
+  files:
+    requirement: Existing-Spec.md
+  sources:
+    S1:
+      type: text
+      status: collected
+      version: '工单第1版'
+      summary: 用户希望默认值为 2，本次不改数据库
+    S2:
+      type: recording
+      status: skipped
+      required: false
+      reason: 此需求没有会议录像
+artifacts:
+  Existing-Spec.md: |
+    # 规格
+    范围内 R1：app 的默认值为 2。给定默认配置，当读取值，则返回 2。
+    明确不做：数据库、接口和发布。
+  05-impact.md: |
+    # 影响
+    app.py 定义默认值，tests/test_app.py 验证此行为。
+    无数据库、权限或接口影响，不需服务启动。
+  06-plan.md: |
+    # 计划
+    TASK-1 修改默认值并补充项目已有 unittest 测试。
+    仅变更 app.py 与 tests/test_app.py；运行 unit 后验收，不自动提交。
+  requirements.yaml:
+    requirements:
+      - id: R1
+        title: 默认值为 2
+        sources: [S1]
+        acceptance: 给定默认配置，当读取值，则返回 2
+    out_of_scope: [数据库, 接口, 发布]
+  tasks.yaml:
+    tasks:
+      - id: TASK-1
+        title: 修复默认值并验证
+        repo: app
+        requirements: [R1]
+        depends_on: []
+        files: [app.py, tests/test_app.py]
+        checks: [unit]
+  cases.yaml:
+    cases:
+      - id: T1
+        requirements: [R1]
+        repo: app
+        kind: auto
+        check: unit
+        expected: 默认配置读取值为 2

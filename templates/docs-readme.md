@@ -1,5 +1,4 @@
 # 文档目录
 
-`docs.mode` 为 `local` 时：本目录只在这台电脑上，不要 `git add`，不要提交。
-
-`docs.mode` 为 `repo` 或 `share` 时：按该落点的协作方式保存（文档库提交，或随 OneDrive 同步）。
+模式由 project.yaml 的 docs.mode 决定：local 保留本机，tracked 随当前工作区 Git，repo 随独立文档仓，share 随已授权共享目录。
+本机 project.local.yaml、安装备份及过程文件不提交。文档是否提交仍按团队规范和用户授权。
