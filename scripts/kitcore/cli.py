@@ -7,6 +7,8 @@ import shutil
 import sys
 from . import VERSION
 from . import experience
+from . import testing
+from .discovery import discover, AREAS
 from .storage import KitError, read
 from .workspace import KIT, install, rollback, load, config_issues
 from .workflow import adopt, select, prepare, next_step, context, issues_for, mutate, run_check
@@ -55,6 +57,21 @@ def parser():
     c.add_argument('--input')
     c.add_argument('--expect', type=int)
     c.add_argument('--apply', action='store_true')
+    c = sub.add_parser('discover', help='只读发现项目资料、过期事实和配置绑定差异')
+    c.add_argument('--workspace', required=True)
+    c.add_argument('--area', choices=AREAS, default='overview')
+    c = sub.add_parser('cases', help='用例种子生成和规范化导入；原件由 Agent 解析')
+    c.add_argument('action', choices=('draft', 'import'))
+    c.add_argument('--workspace', required=True)
+    c.add_argument('--id')
+    c.add_argument('--repo')
+    c.add_argument('--input')
+    c.add_argument('--original', help='原始任意格式文件；输入包每条需 source_location')
+    c.add_argument('--source', choices=('qa', 'ai'), default='qa')
+    c.add_argument('--reviewed-by', default='')
+    c.add_argument('--replace', action='store_true')
+    c.add_argument('--expect', type=int)
+    c.add_argument('--apply', action='store_true')
     c = sub.add_parser('rollback')
     c.add_argument('--workspace', required=True)
     c.add_argument('--backup', required=True)
@@ -97,7 +114,16 @@ def main(argv=None):
     args = parser().parse_args(argv)
     try:
         command = args.command
-        if command == 'assist':
+        if command == 'discover':
+            result = discover(args.workspace, args.area)
+        elif command == 'cases':
+            if args.action == 'draft':
+                result = testing.draft(args.workspace, args.id, args.repo)
+            else:
+                if not args.input:
+                    raise KitError('先由 Agent 解析原件并生成规范化用例，import 需要 --input')
+                result = testing.import_cases(args.workspace, args.id, args.input, args.expect, args.source, args.reviewed_by, args.replace, args.apply, args.original)
+        elif command == 'assist':
             if args.intent == 'begin':
                 result = experience.begin(args.workspace, args.id, request=args.request, repo=args.repo, files=args.file, checks=args.check, acceptance=args.acceptance, out_of_scope=args.out_of_scope, profile=args.profile, risks=args.risk, by=args.by, authorization_note=args.authorization_note, manual_acceptance=args.manual_acceptance, apply=args.apply)
             elif args.intent == 'change':

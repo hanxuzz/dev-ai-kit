@@ -65,3 +65,11 @@ kit assist change --workspace <工作区> --expect <最新revision> --input <更
 先预览，再在已授权范围加 `--apply`。更新包沿用 prepare，可增加 `change_kind: editorial` 与 `reason`（仅经核对无业务含义变化的文字纠错）。普通结构化变更自动分析影响，不需要输入 scoped。`change_kind: broad` 可显式要求整体复核。应用后需确认的仅是新增决定；用真实依据调用 confirm。底层 `change` 仍保留全量重开语义。
 
 `run --diagnostic-log` 显式保存最近 32 KiB 输出的脱敏版本到业务工作区 `.dev-ai-kit/diagnostics/`，路径只返回本机，不写入证据。默认不落原始日志；日志可能仍有未知敏感格式，分享前检查。JSON 错误附带 code、impact、next_action 和 needs_user_decision；不要求用户处理 revision 冲突等内部维护。
+
+## 测试用例
+
+生成基础种子用 cases draft；任意格式原件由 flow-testing 主动解析为统一 YAML，再用 cases import 预览与应用。原件追踪、审阅、JUnit 映射及本地/dev 环境详见 [测试自动化](test-automation.md)。
+
+## 项目发现
+
+`discover --workspace <工作区> --area testing` 只读列出资料候选、项目事实过期及配置绑定差异。详情见 [项目上下文协议](project-context.md)。它不是自动执行命令的许可，也不代替 Agent 阅读、核实和应用配置。

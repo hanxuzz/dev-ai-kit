@@ -5,6 +5,8 @@ description: 登记新需求或接管已有 Spec/计划，保留原件并建立�
 
 # 登记与接管
 
+开始前按 [flow-project-context](../flow-project-context/SKILL.md) 主动核对本步骤依赖的项目事实，将核实结果应用到项目配置与材料；来源变化只复核受影响部分，不拿套件示例代替实际项目约定。
+
 自然语言开发请求先经 [flow-entry](../flow-entry/SKILL.md)；明确小修复优先 assist begin。仅整理的请求不传 execution 授权。
 
 先读 `docs/fit.md` 选择 quick/standard/cross-system；先确认当前工作区和文档落点，不要求未接管需求先通过就绪校验。

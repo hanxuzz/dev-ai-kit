@@ -14,6 +14,7 @@ from .storage import KitError, read, atomic, inside, identifier, digest, lock, n
 from .workspace import load, config_issues, git
 from .changes import analyze, material_snapshot, subject_fingerprint
 from .diagnostics import summarize, redact
+from .testing import environment, junit_results
 
 ROLES = {'requirement': '04-requirement.md', 'impact': '05-impact.md', 'plan': '06-plan.md', 'testcases': '07-testcases.md'}
 STAGES = ('intake', 'meeting', 'sources', 'questions', 'requirement', 'impact', 'plan', 'build', 'test', 'done')
@@ -195,6 +196,12 @@ def definition_issues(w, project, directory, state):
         if not isinstance(spec, dict):
             issues.append(f'检查 {name} 未配置')
             continue
+        try:
+            environment(project, spec)
+        except KitError as error:
+            issues.append(str(error))
+        if spec.get('report') not in (None, 'junit'):
+            issues.append('检查 report 仅支持 junit')
         argv = spec.get('argv')
         if not isinstance(argv, list) or not argv or any(not isinstance(x, str) or not x for x in argv):
             issues.append(f'检查 {name} 的 argv 必须是非空字符串数组')
@@ -221,6 +228,10 @@ def definition_issues(w, project, directory, state):
         if not task.get('checks') and not task.get('manual_acceptance'):
             issues.append(f'{tid} 缺少验证命令或人工验收条件')
         for check in task.get('checks', []):
+            spec = checks.get(check) if isinstance(checks.get(check), dict) else {}
+            env = project.get('runtime', {}).get('environments', {}).get(spec.get('environment'), {})
+            if env.get('kind') == 'dev':
+                issues.append(f'{tid} 不能用 dev 部署的检查证明本地代码完成；将 dev 检查映射到验收用例')
             if not isinstance(checks.get(check), dict) or checks[check].get('repo') != task.get('repo'):
                 issues.append(f'{tid} 的检查 {check} 未配置或属于其他仓库')
     if req_ids - assigned:
@@ -239,6 +250,8 @@ def definition_issues(w, project, directory, state):
     covered = set()
     for case in cases:
         cid = case['id']
+        if case.get('review_status', 'reviewed') != 'reviewed':
+            issues.append(f'{cid} 是未审阅用例草稿，先核对步骤、预期和覆盖')
         if not case.get('requirements') or any(x not in req_ids for x in case.get('requirements', [])):
             issues.append(f'{cid} 的验收映射无效')
         if not case.get('expected'):
@@ -251,6 +264,11 @@ def definition_issues(w, project, directory, state):
             check = case.get('check')
             if not isinstance(checks.get(check), dict) or checks[check].get('repo') != case.get('repo'):
                 issues.append(f'{cid} 的自动检查未配置或仓库不匹配')
+            spec = checks.get(check) if isinstance(checks.get(check), dict) else {}
+            if case.get('test_name') and spec.get('report') != 'junit':
+                issues.append(f'{cid} 的逐条自动结果需要 report: junit')
+            if spec.get('report') == 'junit' and (not isinstance(case.get('test_name'), str) or '::' not in case['test_name']):
+                issues.append(f'{cid} 需要精确 test_name: classname::name')
         covered.update(case.get('requirements', []))
     if req_ids - covered:
         issues.append('验收未覆盖：' + ', '.join(sorted(req_ids - covered)))
@@ -396,6 +414,10 @@ def valid_evidence(w, project, docs, directory, state, kind, target, repo):
         return False
     if kind == 'check' and e.get('check_hash') != digest(project.get('runtime', {}).get('checks', {}).get(target, {})):
         return False
+    if kind == 'check':
+        env, _ = environment(project, project.get('runtime', {}).get('checks', {}).get(target, {}))
+        if e.get('environment') != env:
+            return False
     inputs = project.get('runtime', {}).get('checks', {}).get(target, {}).get('inputs') if kind == 'check' else None
     return e.get('code', {}).get('tree') == code_snapshot(w, project, docs, repo, inputs)['tree']
 
@@ -414,7 +436,11 @@ def completion_issues(w, p, docs, d, s):
     for case in definitions(d, 'cases'):
         kind = 'check' if case['kind'] == 'auto' else 'case'
         target = case['check'] if kind == 'check' else case['id']
-        if not valid_evidence(w, p, docs, d, s, kind, target, case['repo']):
+        passed = valid_evidence(w, p, docs, d, s, kind, target, case['repo'])
+        if kind == 'check' and case.get('test_name'):
+            evidence = latest_evidence(d, kind, target) or {}
+            passed = passed and evidence.get('case_results', {}).get(case['id']) == 'passed'
+        if not passed:
             problems.append(f"用例 {case['id']} 尚未在当前代码上通过")
     return problems
 
@@ -541,15 +567,25 @@ def run_check(workspace, req_id, check_id, expected, ready=(), diagnostic_log=Fa
         raise KitError('前置条件未确认：' + ', '.join(sorted(set(requires) - set(ready))))
     if 'database' in requires and p.get('runtime', {}).get('database', {}).get('readonly') is not True:
         raise KitError('数据库检查需要已配置的只读账号；配置声明不能替代数据库实际权限')
+    env_snapshot, injected = environment(p, check, require_secrets=True)
+    if env_snapshot and env_snapshot['kind'] == 'dev' and f"environment:{env_snapshot['name']}" not in ready:
+        raise KitError('dev 环境执行前需核实目标、部署版本、账号和数据范围，再传 --ready environment:<名称>')
     path = repo_path(w, p, check['repo'])
     cwd = inside(path, check.get('cwd') or '.')
     before = code_snapshot(w, p, docs, check['repo'], check.get('inputs'))
     all_before = code_snapshot(w, p, docs, check['repo'])
     fp = fingerprint(d, s)
+    report_path = None
+    if check.get('report') == 'junit':
+        report_path = inside(w, '.dev-ai-kit/reports/' + uuid.uuid4().hex + '.xml')
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        injected['KIT_JUNIT_PATH'] = str(report_path)
+    child_env = {k: v for k, v in os.environ.items() if k not in ('KIT_BASE_URL', 'KIT_ENVIRONMENT', 'KIT_ENVIRONMENT_KIND', 'KIT_JUNIT_PATH')}
+    child_env.update(injected)
     # Raw output stays temporary by default; optional local logs receive best-effort redaction.
     with tempfile.TemporaryFile() as output:
         try:
-            proc = subprocess.Popen(argv, cwd=cwd, stdout=output, stderr=subprocess.STDOUT, start_new_session=os.name != 'nt')
+            proc = subprocess.Popen(argv, cwd=cwd, env=child_env, stdout=output, stderr=subprocess.STDOUT, start_new_session=os.name != 'nt')
         except OSError as error:
             raise KitError('检查命令无法启动，请核对执行文件和目录') from error
         timed_out = False
@@ -581,17 +617,32 @@ def run_check(workspace, req_id, check_id, expected, ready=(), diagnostic_log=Fa
     after = code_snapshot(w, p, docs, check['repo'])
     result = 'passed' if code == 0 and not timed_out and all_before == after else 'failed'
     diagnostic = summarize(excerpt, code, timed_out, all_before != after)
+    report = None
+    if report_path:
+        try:
+            report = junit_results(report_path, [c for c in definitions(d, 'cases') if c.get('check') == check_id and c.get('kind') == 'auto'])
+        except KitError:
+            report = {'ok': False, 'cases': {}, 'tests': 0, 'failures': 0}
+        finally:
+            report_path.unlink(missing_ok=True)
+        if not report['ok']:
+            result = 'failed'
+            diagnostic = {'category': 'case-results', 'message': '逐条结果未通过、缺失、跳过、重复或报告无效', 'next_action': '检查 JUnit 输出及 test_name 映射，不能用命令成功替代用例通过'}
     log_path = None
     if diagnostic_log:
         log_path = w / '.dev-ai-kit/diagnostics' / (uuid.uuid4().hex + '.log')
         atomic(log_path, redact(excerpt))
         log_path.chmod(0o600)
     with state_lock(w):
-        _, _, _, _, current_dir, current = context(w, req_id)
+        _, current_project, _, _, current_dir, current = context(w, req_id)
+        current_check = current_project.get('runtime', {}).get('checks', {}).get(check_id, {})
+        current_env, _ = environment(current_project, current_check)
+        if digest(current_check) != digest(check) or current_env != env_snapshot:
+            raise KitError('执行期间测试配置或环境改变；结果不记为有效证据')
         if current.get('revision') != expected or fingerprint(current_dir, current) != fp:
             raise KitError('执行期间需求状态改变；本次结果不记为有效证据，请重新检查')
         e = {'id': uuid.uuid4().hex, 'at': now(), 'target_type': 'check', 'target': check_id, 'result': result, 'exit_code': code, 'timed_out': timed_out, 'code_changed_during_check': all_before != after,
-             'code': before, 'fingerprint': fp, 'subject_fingerprint': subject_fingerprint(d, current, 'check', check_id), 'check_hash': digest(check), 'output_sha256': output_hash.hexdigest(), 'output_bytes': byte_count, 'diagnostic': diagnostic}
+             'code': before, 'fingerprint': fp, 'subject_fingerprint': subject_fingerprint(d, current, 'check', check_id), 'check_hash': digest(check), 'output_sha256': output_hash.hexdigest(), 'output_bytes': byte_count, 'diagnostic': diagnostic, 'environment': env_snapshot, 'case_results': report['cases'] if report else {}, 'report': report}
         atomic(d / '.kit/evidence' / (e['id'] + '.yaml'), e)
         persist(d, current, expected, 'check', {'id': check_id, 'result': result, 'evidence': e['id']})
     return {**e, 'revision': current['revision'], 'local_diagnostic_log': str(log_path) if log_path else None}

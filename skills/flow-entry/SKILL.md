@@ -5,6 +5,8 @@ description: 将开发者开始、继续、变更和检查交付的自然语言�
 
 # 从开发意图开始
 
+开始前按 [flow-project-context](../flow-project-context/SKILL.md) 主动核对本步骤依赖的项目事实，将核实结果应用到项目配置与材料；来源变化只复核受影响部分，不拿套件示例代替实际项目约定。
+
 先读取 project.yaml/project.local.yaml，命令入口见套件 [运行文档](../../docs/runtime.md)。用户无需调用技能名字或选择流程级别；只解释代码时直接回答。
 
 - **开始**：先看代码与已有工单/规格。`assist begin` 预览；Agent 提炼稳定 id、真实文件范围、验收、不做事项和现有检查，已授权时 `--apply`。简单请求可由原话同时表达范围确认和执行授权，用实际 `--by`、`--authorization-note` 记录，不再询问同一决定。缺少执行意图时不要补造授权。quick 生成最小 brief 与映射；standard/cross-system 转 [登记](../flow-intake/SKILL.md) 和 [计划](../flow-plan/SKILL.md)，沿用已有材料。
@@ -13,3 +15,5 @@ description: 将开发者开始、继续、变更和检查交付的自然语言�
 - **检查交付**：`assist review` 只读诊断，再按 [验证](../flow-test/SKILL.md) 处理缺口。review 不自动执行检查或表示用户已验收。
 
 命令参数见 [Agent 参考](../../docs/cli-reference.md)。profile 自动推荐只是启发式，必须核对实际业务风险和检查覆盖，不能用关键词代替判断。默认回复当前结果、缺口和下一步，不输出内部状态表。
+
+生成/导入测试用例、启动本地或连接 dev 测试时，转 [flow-testing](../flow-testing/SKILL.md)：主动解析用户原件并按统一规范导入，不要求用户先转格式。

@@ -137,3 +137,7 @@ schema_version 仍为 2，旧状态无需重建。新增可选状态字段由核
 内容不变的 Git commit 不要求重新验证；命令配置变化仍失效。检查运行时仍监测整个仓库，写入输入集外代码也不会获得通过证据。`scope_revision` 只标记范围代次，0.3 的局部验证适用性以 subject_fingerprint 和 evidence_epoch 为准。
 
 prepare 写材料前使确认失效，写完再保存新摘要；一次命令可能递增 revision 多次，必须使用返回值，不自行加一。
+
+## 测试用例与环境扩展
+
+cases 支持 title/steps/preconditions/test_data/source_location/external_id/origin/review_status/test_name。新导入用例必须显式审阅，auto 用精确 classname::name 对应 JUnit。checks 可增加 report: junit 和 environment，runtime.environments 保存 local/dev 目标及部署版本，不保存凭证值。详细规范见 [测试接入](test-automation.md)。状态 schema 仍为 2，旧命令级检查保持兼容。

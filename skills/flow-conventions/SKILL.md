@@ -5,6 +5,8 @@ description: 收集和确认业务仓已有规范，区分分支策略与自动�
 
 # 团队规范
 
+开始前按 [flow-project-context](../flow-project-context/SKILL.md) 主动核对本步骤依赖的项目事实，将核实结果应用到项目配置与材料；来源变化只复核受影响部分，不拿套件示例代替实际项目约定。
+
 读各代码仓 AGENTS.md、CONTRIBUTING、README 和规则，保留来源，写入 team/conventions.md，不改项目原文。
 一次性展示已经读到的结论，重点问缺项与冲突；用户明确认可已有规范就采用，不要求复述固定口令。
 

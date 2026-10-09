@@ -11,6 +11,8 @@ docs:
 runtime:
   # 检查按需执行。没有 database 依赖的单元测试不要求连接数据库。
   checks: {}
+  # 测试环境和 JUnit 逐条结果见 docs/test-automation.md；这里不保存凭证。
+  environments: {}
   # 配置示例（先确认项目已有命令，再取消注释）：
   # frontend-unit:
   #   repo: frontend
