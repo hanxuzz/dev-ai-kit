@@ -577,7 +577,7 @@ def next_step(workspace, req_id=None):
         return {'phase': 'select', 'action': '选择已有需求，或登记新需求', 'requirements': ids, 'mutates': False}
     d = inside(root, identifier(selected))
     if not (d / 'status.yaml').exists():
-        return {'phase': 'adopt', 'action': f'接管 {selected}；先补最小状态，不执行普通就绪门禁', 'mutates': False}
+        return {'phase': 'adopt', 'action': f'{selected} 还没有新的进度记录。先只看一眼，不改任何文件，原来的规格和计划都留着。你回复可以接管之后，才会把新进度记下来。在这之前不改业务代码。', 'mutates': False}
     w, p, local, docs, d, s = context(w, selected)
     result = {'id': selected, 'revision': s.get('revision', 0), 'phase': '', 'action': '', 'mutates': False}
     def answer(phase, action, details=None):
@@ -586,7 +586,7 @@ def next_step(workspace, req_id=None):
             result['details'] = details
         return result
     if s.get('schema_version') != SCHEMA:
-        return answer('adopt', '预览并迁移旧版状态；保留已有材料')
+        return answer('adopt', '这是旧版进度。先只看一眼，不改文件：原来的规格和计划都留着。以前清单上打过勾的，不算已经做完。你回复可以接管之后，才会写入新进度。在这之前不改业务代码。')
     if s.get('blocker'):
         return answer('blocked', '先处理当前阻塞', [s['blocker']])
     if s.get('questions') == 'open':
