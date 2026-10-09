@@ -1,48 +1,35 @@
-# 日常手册
+# 开发者日常使用
 
-命令前缀 `kit` 的替换方式见 [docs/runtime.md](docs/runtime.md)。每次变更状态后使用返回的新 revision，不缓存旧值。
+你描述要完成的工作，Agent 负责读取项目、整理任务、维护状态和选择验证方式。无需手填 YAML、记任务号或选择技能。
 
-## 一条需求
+## 开始一项工作
 
-```text
-kit adopt --workspace <工作区> --id REQ-123 --profile standard
-kit adopt --workspace <工作区> --id REQ-123 --profile standard --apply
-kit prepare --workspace <工作区> --expect 0 --input <整理包.yaml>
-kit validate --workspace <工作区> --ready
-kit confirm --workspace <工作区> --expect 1 --by <实际确认人> --note <确认依据>
-kit next --workspace <工作区>
-kit start --workspace <工作区> --target TASK-1 --expect 2
-```
+例如：“把保存成功的提示改成‘已保存’，修改并验证，其他行为不变。”
 
-Agent 在明确授权内修改业务代码，然后：
+Agent 先核对代码和已有材料。范围、验收和执行意图已经明确的小修复，用一份简短说明接续开发，不重复要求你确认同一句话。普通需求沿用现有工单或规格；跨系统、权限或数据变化才补充相应影响分析。流程级别由 Agent 建议，你不必知道 quick 的名字。
 
-```text
-kit run --workspace <工作区> --check <配置的检查名> --expect 3
-kit finish --workspace <工作区> --target TASK-1 --expect 4
-kit next --workspace <工作区>
-kit complete --workspace <工作区> --expect 5 --by <实际验收人> --note <验收结论>
-```
+只有影响业务结果且无法从现有资料确定的问题才需要你回答。原始请求不足以确定范围时，Agent 会具体指出缺少什么。
 
-以上 revision 仅示例，实际使用命令返回值。完整示例见 `examples/workflow/`。
+## 继续或查看进度
 
-## 常用操作
+“现在到哪了？”只查看。你会看到已完成、正在做、尚未验证和下一步。
 
-| 情况 | 操作 |
-|------|------|
-| 切换已有需求 | select --id REQ-456 |
-| 查看完整状态/交接 | status --full |
-| 人工用例已实际执行 | manual --target case:T1 --result passed --by ... --note ... --expect N |
-| 任务采用人工验收 | manual --target task:TASK-1 ... |
-| 有阻塞/已解决 | block --note <原因或空字符串> --expect N |
-| 范围变化 | change --by ... --note ... --expect N，再 prepare/confirm |
-| 保存交接 | prepare 更新 state.handoff，保留当前 scope 确认 |
-| 全项目检查 | validate --all；需要就绪检查再加 --ready |
+“继续完成已确认的任务”允许在既定范围内继续。换对话后，Agent 核对代码变化及历史证据，接续正在进行的任务，不重复开始、不丢掉修改前记录。缺少环境、验收失败或材料变化会单独说明。
 
-不论通过 API 还是 CLI 记录，by/note 都必须对应真实发生的确认或观察；不能编造人名和结论。
-需求问题 open 时先澄清；过期验证需重跑；没有自动命令可以走已约定的人工验收。
+## 修改需求
 
-## 失败处理
+“把刚才的提示改成‘保存完成’，其余不变。”
 
-错误有非零退出码和 JSON error，不包含配置原文或凭证。先理解原因，不为了通过而删用例、改验收或伪造确认。
-run 失败保留结果摘要和退出码；原始输出未长期保存，需要排障时在授权范围内复现并脱敏查看。
-安装失败恢复、并发冲突、旧版本迁移见 [运行文档](docs/runtime.md)。
+Agent 展示变化、受影响任务、需要重跑的检查和保留工作。只确认新增决定；你的明确变更指令已经包含这些决定时，直接记录依据。已完成且不受影响的工作保留。
+
+仅修正文档错字时，Agent 核对没有业务含义变化后记录理由。无法建立影响映射、来源或全局约束变化时，仍需整体复核。脚本不能代替业务判断。
+
+## 检查交付
+
+“检查是否可以交付，列出还没验证的部分。”
+
+Agent 优先使用项目已有单元、组件、接口和集成检查，关键旅程才补充 E2E；没有合适自动检查时，写出并实际执行人工验收。失败说明原因与下一步，代码或检查命令变化会提示重跑。完成开发、通过检查、你接受交付是不同事实，分别记录。
+
+普通输出保持简短：改了什么、验证结果、剩余问题。提交、推送和发布按你的明确要求执行。
+
+安装见 [运行文档](docs/runtime.md)。维护者需要排障或集成脚本时再读 [命令参考](docs/cli-reference.md) 和 [状态协议](docs/schema.md)。

@@ -5,6 +5,8 @@ description: 登记新需求或接管已有 Spec/计划，保留原件并建立�
 
 # 登记与接管
 
+自然语言开发请求先经 [flow-entry](../flow-entry/SKILL.md)；明确小修复优先 assist begin。仅整理的请求不传 execution 授权。
+
 先读 `docs/fit.md` 选择 quick/standard/cross-system；先确认当前工作区和文档落点，不要求未接管需求先通过就绪校验。
 
 1. 有工单号用工单号，否则从用户描述提炼稳定短名。目录已有时接管，不另建同义需求。

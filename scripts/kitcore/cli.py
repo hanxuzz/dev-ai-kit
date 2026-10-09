@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 import sys
 from . import VERSION
+from . import experience
 from .storage import KitError, read
 from .workspace import KIT, install, rollback, load, config_issues
 from .workflow import adopt, select, prepare, next_step, context, issues_for, mutate, run_check
@@ -36,6 +37,24 @@ def parser():
         c.add_argument('--docs-repo')
         c.add_argument('--share')
         c.add_argument('--migrate-config', action='store_true', help='迁移旧配置结构并要求重新确认规范；保留旧命令，不猜测执行方式')
+    c = sub.add_parser('assist', help='Agent 使用的统一意图入口；默认只读/预览')
+    c.add_argument('intent', choices=('begin', 'resume', 'change', 'review'))
+    c.add_argument('--workspace', required=True)
+    c.add_argument('--id')
+    c.add_argument('--request', default='')
+    c.add_argument('--repo', default='')
+    c.add_argument('--file', action='append', default=[])
+    c.add_argument('--check', action='append', default=[])
+    c.add_argument('--acceptance', default='')
+    c.add_argument('--out-of-scope', default='')
+    c.add_argument('--profile', choices=('auto', 'quick', 'standard', 'cross-system'), default='auto')
+    c.add_argument('--risk', action='append', default=[])
+    c.add_argument('--by', default='')
+    c.add_argument('--authorization-note', default='')
+    c.add_argument('--manual-acceptance', default='')
+    c.add_argument('--input')
+    c.add_argument('--expect', type=int)
+    c.add_argument('--apply', action='store_true')
     c = sub.add_parser('rollback')
     c.add_argument('--workspace', required=True)
     c.add_argument('--backup', required=True)
@@ -69,6 +88,7 @@ def parser():
             c.add_argument('--result', choices=('passed', 'failed', 'blocked'), required=True)
         if name == 'run':
             c.add_argument('--check', required=True)
+            c.add_argument('--diagnostic-log', action='store_true', help='显式保存本机受控脱敏诊断尾部；不进入需求证据目录')
             c.add_argument('--ready', action='append', default=[], help='用户授权且已验证的依赖名，可重复')
     return p
 
@@ -77,7 +97,18 @@ def main(argv=None):
     args = parser().parse_args(argv)
     try:
         command = args.command
-        if command in ('install', 'upgrade'):
+        if command == 'assist':
+            if args.intent == 'begin':
+                result = experience.begin(args.workspace, args.id, request=args.request, repo=args.repo, files=args.file, checks=args.check, acceptance=args.acceptance, out_of_scope=args.out_of_scope, profile=args.profile, risks=args.risk, by=args.by, authorization_note=args.authorization_note, manual_acceptance=args.manual_acceptance, apply=args.apply)
+            elif args.intent == 'change':
+                if args.expect is None or not args.input:
+                    raise KitError('Agent 应先读取当前 revision 并准备更新内容；change 需要 --expect 和 --input')
+                result = experience.change(args.workspace, args.id, args.expect, read(args.input), args.apply)
+            else:
+                result = experience.resume(args.workspace, args.id)
+                if args.intent == 'review':
+                    result['delivery_ready'] = result.get('phase') in ('accept', 'done')
+        elif command in ('install', 'upgrade'):
             result = install(args.workspace, apply=args.apply, mode=args.mode, docs_repo=args.docs_repo, share=args.share, migrate_config=args.migrate_config)
         elif command == 'rollback':
             result = rollback(args.workspace, args.backup)
@@ -117,13 +148,13 @@ def main(argv=None):
                 problems = issues_for(w, args.id, args.ready) if args.id or local.get('current') else config_issues(w)
             result = {'ok': not problems, 'issues': problems}
         elif command == 'run':
-            result = run_check(args.workspace, args.id, args.check, args.expect, args.ready)
+            result = run_check(args.workspace, args.id, args.check, args.expect, args.ready, args.diagnostic_log)
         else:
             result = mutate(args.workspace, args.id, args.expect, command, by=getattr(args, 'by', ''), note=getattr(args, 'note', ''), target=getattr(args, 'target', ''), value=getattr(args, 'result', ''))
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 1 if result.get('ok') is False or result.get('missing') or result.get('result') == 'failed' else 0
     except KitError as error:
-        print(json.dumps({'ok': False, 'error': str(error)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps(experience.error_response(str(error)), ensure_ascii=False), file=sys.stderr)
         return 1
     except (OSError, TypeError, KeyError, ValueError, AttributeError) as error:
         # Never echo malformed configuration values or secrets in a traceback.

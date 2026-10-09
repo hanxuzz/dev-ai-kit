@@ -71,3 +71,9 @@ kit rollback --workspace <工作区> --backup <安装输出的备份号>
 `prepare` 先使确认失效，再写材料；中断后是未确认草稿，已存在材料的备份在该需求 `.kit/edits/`。重新检查备份和现有内容，再提交一次更新，不自动重跑业务命令。
 
 需要将旧配置结构写成 v2 时，先预览 `upgrade --migrate-config`，再加 `--apply`。它保留旧字段，新增 checks 和独立分支策略，并清除旧规范确认；不自动把旧命令字符串转成可执行 argv。迁移同样有备份可回退。YAML 重写会规范化格式并丢失注释，原文保存在备份里。
+
+## 0.3 日常入口与诊断
+
+日常由 Agent 使用 assist begin/resume/change/review，参数细节在 [命令参考](cli-reference.md)。升级到 0.3 后保留 schema v2、旧命令及旧证据兼容；升级安装规则后才能让已有项目获得新的意图路由。
+
+检查默认仅记录分类诊断。显式 `run --diagnostic-log` 写入工作区忽略目录 `.dev-ai-kit/diagnostics/`，不会同步进需求证据。仅保留输出尾部并尽力脱敏，人工检查后再分享；不再需要时可删除该目录中的日志，不影响验证记录。

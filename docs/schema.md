@@ -43,7 +43,7 @@ runtime:
 |------|------|
 | schema_version | 固定 2 |
 | revision | 每次状态修改递增，调用者使用 --expect 做并发检查 |
-| scope_revision | 范围变更/重新确认的代次，旧证据不会复活 |
+| scope_revision | 范围变更/重新确认的代次，证据适用性见下文 0.3 规则 |
 | profile | quick、standard、cross-system |
 | files | requirement/impact/plan/testcases → 既有文件名，空值才回退到默认名 |
 | sources | 来源编号 → 类型、收集状态、版本、相对快照路径或链接 |
@@ -118,3 +118,22 @@ artifacts:
 人工证据必须由真实执行者提供实际观察；Agent 不能替未执行的人填写通过。
 同一检查只使用最新结果，代码或命令配置变化会使旧证据失效。检查执行期间改了代码也不能记为通过。
 源码指纹基于 Git 跟踪及未忽略文件，排除套件元数据和文档根；需要影响验证的构建配置不要放在 Git 忽略列表里。
+
+## 0.3 增量字段与失效规则
+
+schema_version 仍为 2，旧状态无需重建。新增可选状态字段由核心维护：
+
+- `evidence_epoch`：整体范围变化时增加，使此前全部验证失效。
+- `pending_change`：差异、受影响及保留任务、建议重跑检查、候选指纹。确认必须匹配此指纹才能保留无关工作。
+- `execution_authorization`：明确轻量请求的真实确认者、原话、范围指纹及任务；只用作恢复依据，不是身份认证或扩权机制。
+- `approval.snapshot`：确认时结构化材料快照；`editorial_note` 记录经审阅的文字纠错理由。
+- 证据 `subject_fingerprint`：关联需求、任务依赖、用例、来源与全局约束的摘要。局部变更仅使关联证据失效；旧版无此字段的证据仍使用整体材料摘要。
+- 证据 `diagnostic`：失败分类、可识别的 unittest 用例名与下一步，不包含原始错误正文。
+
+`assist change` 和 prepare 都按映射及任务传递依赖分析。来源、全局约束、未映射正文变化和过期旧确认采取整体复核。`editorial` 必须有 reason 且不改变结构化定义，由操作者核对自然语言含义；不能作为自动语义等价证明。正文伴随结构化变化时，操作者还须确认两者范围一致。
+
+`runtime.checks.<name>.inputs` 可选，为相对仓库的非空 glob 列表，使用大小写敏感 fnmatch 匹配（`*` 可匹配路径分隔符，不是 Git pathspec）。默认省略，覆盖全部未忽略代码。仅在已核实完整依赖后收窄，包含被测代码、测试、共享代码、构建配置和依赖锁文件；配置不完整可能漏报过期验证。
+
+内容不变的 Git commit 不要求重新验证；命令配置变化仍失效。检查运行时仍监测整个仓库，写入输入集外代码也不会获得通过证据。`scope_revision` 只标记范围代次，0.3 的局部验证适用性以 subject_fingerprint 和 evidence_epoch 为准。
+
+prepare 写材料前使确认失效，写完再保存新摘要；一次命令可能递增 revision 多次，必须使用返回值，不自行加一。

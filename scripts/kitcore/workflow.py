@@ -12,6 +12,8 @@ import uuid
 from . import SCHEMA
 from .storage import KitError, read, atomic, inside, identifier, digest, lock, now
 from .workspace import load, config_issues, git
+from .changes import analyze, material_snapshot, subject_fingerprint
+from .diagnostics import summarize, redact
 
 ROLES = {'requirement': '04-requirement.md', 'impact': '05-impact.md', 'plan': '06-plan.md', 'testcases': '07-testcases.md'}
 STAGES = ('intake', 'meeting', 'sources', 'questions', 'requirement', 'impact', 'plan', 'build', 'test', 'done')
@@ -146,8 +148,13 @@ def code_files(w, project, docs, repo):
     return files
 
 
-def code_snapshot(w, project, docs, repo):
-    return {'head': git(repo_path(w, project, repo), 'rev-parse', 'HEAD'), 'tree': digest(code_files(w, project, docs, repo))}
+def code_snapshot(w, project, docs, repo, inputs=None):
+    files = code_files(w, project, docs, repo)
+    if inputs is not None:
+        if not isinstance(inputs, list) or not inputs or any(not isinstance(x, str) or not x or x.startswith('/') or '..' in x.split('/') for x in inputs):
+            raise KitError('inputs 必须是非空相对路径/glob 列表；遗漏依赖会降低验证可信度')
+        files = {name: value for name, value in files.items() if any(fnmatch.fnmatchcase(name, pattern) for pattern in inputs)}
+    return {'head': git(repo_path(w, project, repo), 'rev-parse', 'HEAD'), 'tree': digest(files)}
 
 
 def definition_issues(w, project, directory, state):
@@ -380,11 +387,17 @@ def latest_evidence(directory, target_type, target):
 
 def valid_evidence(w, project, docs, directory, state, kind, target, repo):
     e = latest_evidence(directory, kind, target)
-    if not e or e.get('result') != 'passed' or e.get('fingerprint') != fingerprint(directory, state):
+    if not e or e.get('result') != 'passed':
+        return False
+    if e.get('subject_fingerprint'):
+        if e['subject_fingerprint'] != subject_fingerprint(directory, state, kind, target):
+            return False
+    elif e.get('fingerprint') != fingerprint(directory, state):
         return False
     if kind == 'check' and e.get('check_hash') != digest(project.get('runtime', {}).get('checks', {}).get(target, {})):
         return False
-    return e.get('code') == code_snapshot(w, project, docs, repo)
+    inputs = project.get('runtime', {}).get('checks', {}).get(target, {}).get('inputs') if kind == 'check' else None
+    return e.get('code', {}).get('tree') == code_snapshot(w, project, docs, repo, inputs)['tree']
 
 
 def completion_issues(w, p, docs, d, s):
@@ -420,12 +433,18 @@ def mutate(workspace, req_id, expected, action, by='', note='', target='', value
                 raise KitError('；'.join(problems))
         if action == 'confirm':
             if not approval_current(d, s):
+                delta = s.get('pending_change', {})
+                preserve = delta.get('fingerprint') == fingerprint(d, s) and delta.get('kind') == 'scoped'
                 s['scope_revision'] = s.get('scope_revision', 0) + 1
-                for task in s.get('tasks', {}).values():
-                    task['status'] = 'pending'
-            s['approval'] = {'by': by, 'note': note, 'at': now(), 'fingerprint': fingerprint(d, s)}
+                if not preserve:
+                    s['evidence_epoch'] = s.get('evidence_epoch', 0) + 1
+                    for task in s.get('tasks', {}).values():
+                        task['status'] = 'pending'
+            s['approval'] = {'by': by, 'note': note, 'at': now(), 'fingerprint': fingerprint(d, s), 'snapshot': material_snapshot(d, s)}
+            s.pop('pending_change', None)
             s['stage'] = 'plan'
         elif action == 'change':
+            s['evidence_epoch'] = s.get('evidence_epoch', 0) + 1
             s['scope_revision'] = s.get('scope_revision', 0) + 1
             s['approval'] = {}
             s['stage'] = 'questions' if s.get('questions') == 'open' else 'impact'
@@ -482,7 +501,7 @@ def mutate(workspace, req_id, expected, action, by='', note='', target='', value
                 raise KitError('只能记录配置了人工验收的 task:id 或 case:id')
             if value not in ('passed', 'failed', 'blocked'):
                 raise KitError('人工结果必须为 passed/failed/blocked')
-            evidence = {'id': uuid.uuid4().hex, 'at': now(), 'target_type': kind, 'target': item_id, 'by': by, 'note': note, 'result': value, 'fingerprint': fingerprint(d, s), 'code': code_snapshot(w, p, docs, item['repo'])}
+            evidence = {'id': uuid.uuid4().hex, 'at': now(), 'target_type': kind, 'target': item_id, 'by': by, 'note': note, 'result': value, 'fingerprint': fingerprint(d, s), 'subject_fingerprint': subject_fingerprint(d, s, kind, item_id), 'code': code_snapshot(w, p, docs, item['repo'])}
             atomic(d / '.kit/evidence' / (evidence['id'] + '.yaml'), evidence)
         elif action == 'complete':
             if not approval_current(d, s):
@@ -498,7 +517,7 @@ def mutate(workspace, req_id, expected, action, by='', note='', target='', value
         return {'id': s['id'], 'revision': s['revision'], 'stage': s['stage'], 'action': action}
 
 
-def run_check(workspace, req_id, check_id, expected, ready=()):
+def run_check(workspace, req_id, check_id, expected, ready=(), diagnostic_log=False):
     w, p, local, docs, d, s = context(workspace, req_id)
     req_id = s['id']  # Pin selection: switching current during a check must not write to another requirement.
     if s.get('revision') != expected:
@@ -524,9 +543,10 @@ def run_check(workspace, req_id, check_id, expected, ready=()):
         raise KitError('数据库检查需要已配置的只读账号；配置声明不能替代数据库实际权限')
     path = repo_path(w, p, check['repo'])
     cwd = inside(path, check.get('cwd') or '.')
-    before = code_snapshot(w, p, docs, check['repo'])
+    before = code_snapshot(w, p, docs, check['repo'], check.get('inputs'))
+    all_before = code_snapshot(w, p, docs, check['repo'])
     fp = fingerprint(d, s)
-    # Never persist raw command output: it may contain credentials or personal data.
+    # Raw output stays temporary by default; optional local logs receive best-effort redaction.
     with tempfile.TemporaryFile() as output:
         try:
             proc = subprocess.Popen(argv, cwd=cwd, stdout=output, stderr=subprocess.STDOUT, start_new_session=os.name != 'nt')
@@ -556,17 +576,25 @@ def run_check(workspace, req_id, check_id, expected, ready=()):
         for chunk in iter(lambda: output.read(65536), b''):
             output_hash.update(chunk)
             byte_count += len(chunk)
+        output.seek(max(0, byte_count - 32768))
+        excerpt = output.read().decode('utf-8', errors='replace')
     after = code_snapshot(w, p, docs, check['repo'])
-    result = 'passed' if code == 0 and not timed_out and before == after else 'failed'
+    result = 'passed' if code == 0 and not timed_out and all_before == after else 'failed'
+    diagnostic = summarize(excerpt, code, timed_out, all_before != after)
+    log_path = None
+    if diagnostic_log:
+        log_path = w / '.dev-ai-kit/diagnostics' / (uuid.uuid4().hex + '.log')
+        atomic(log_path, redact(excerpt))
+        log_path.chmod(0o600)
     with state_lock(w):
         _, _, _, _, current_dir, current = context(w, req_id)
         if current.get('revision') != expected or fingerprint(current_dir, current) != fp:
             raise KitError('执行期间需求状态改变；本次结果不记为有效证据，请重新检查')
-        e = {'id': uuid.uuid4().hex, 'at': now(), 'target_type': 'check', 'target': check_id, 'result': result, 'exit_code': code, 'timed_out': timed_out, 'code_changed_during_check': before != after,
-             'code': before, 'fingerprint': fp, 'check_hash': digest(check), 'output_sha256': output_hash.hexdigest(), 'output_bytes': byte_count}
+        e = {'id': uuid.uuid4().hex, 'at': now(), 'target_type': 'check', 'target': check_id, 'result': result, 'exit_code': code, 'timed_out': timed_out, 'code_changed_during_check': all_before != after,
+             'code': before, 'fingerprint': fp, 'subject_fingerprint': subject_fingerprint(d, current, 'check', check_id), 'check_hash': digest(check), 'output_sha256': output_hash.hexdigest(), 'output_bytes': byte_count, 'diagnostic': diagnostic}
         atomic(d / '.kit/evidence' / (e['id'] + '.yaml'), e)
         persist(d, current, expected, 'check', {'id': check_id, 'result': result, 'evidence': e['id']})
-    return {**e, 'revision': current['revision']}
+    return {**e, 'revision': current['revision'], 'local_diagnostic_log': str(log_path) if log_path else None}
 
 
 def next_step(workspace, req_id=None):
@@ -661,17 +689,35 @@ def prepare(workspace, req_id, expected, bundle):
                 path = inside(d, name)
                 if path.is_file():
                     atomic(inside(backup, name), path.read_bytes())
-        candidate['approval'] = {} if artifacts or any(k in fields for k in ('profile', 'files', 'sources', 'questions')) else candidate.get('approval', {})
-        if not candidate['approval']:
+        delta = analyze(d, s, bundle)
+        was_approved = approval_current(d, s)
+        candidate['approval'] = {} if artifacts or delta['confirmation_required'] else candidate.get('approval', {})
+        if delta['confirmation_required']:
             candidate['scope_revision'] = candidate.get('scope_revision', 0) + 1
-            for entry in candidate.get('tasks', {}).values():
-                entry['status'] = 'pending'
+            if delta['kind'] == 'broad':
+                candidate['evidence_epoch'] = candidate.get('evidence_epoch', 0) + 1
+            for tid, entry in candidate.get('tasks', {}).items():
+                if delta['kind'] == 'broad' or tid in delta['affected_tasks']:
+                    entry['status'] = 'pending'
             candidate['stage'] = 'questions' if candidate['questions'] == 'open' else 'impact'
-        persist(d, candidate, expected, 'prepare', {'fields': sorted(fields), 'artifacts': sorted(artifacts), 'backup': str(backup.relative_to(d)) if artifacts else '', 'previous_fingerprint': before})
-        # State is invalidated before artifacts. A crash here always leaves a recoverable, unapproved draft.
+        if artifacts or delta['confirmation_required']:
+            candidate.pop('pending_change', None)
+        persist(d, candidate, expected, 'prepare', {'fields': sorted(fields), 'artifacts': sorted(artifacts), 'backup': str(backup.relative_to(d)) if artifacts else '', 'previous_fingerprint': before, 'delta': delta})
+        # Invalidate before writing. Interruption leaves an unapproved draft, never a partial approved one.
         for name, value in artifacts.items():
             atomic(inside(d, name), value)
-        return {'id': candidate['id'], 'revision': candidate['revision'], 'approval_current': approval_current(d, candidate), 'backup': str(backup.relative_to(d)) if artifacts else None}
+        if artifacts or delta['confirmation_required']:
+            if was_approved and delta['kind'] in ('none', 'editorial'):
+                candidate['approval'] = copy.deepcopy(s['approval'])
+                candidate['approval']['fingerprint'] = fingerprint(d, candidate)
+                candidate['approval']['editorial_note'] = delta['reason']
+                if candidate.get('execution_authorization', {}).get('fingerprint') == before:
+                    candidate['execution_authorization']['fingerprint'] = candidate['approval']['fingerprint']
+            else:
+                candidate['pending_change'] = {**delta, 'fingerprint': fingerprint(d, candidate)}
+            persist(d, candidate, candidate['revision'], 'material-update-complete', {'delta': delta})
+        return {'id': candidate['id'], 'revision': candidate['revision'], 'approval_current': approval_current(d, candidate), 'delta': delta, 'backup': str(backup.relative_to(d)) if artifacts else None}
+
 
 
 def select(workspace, req_id):

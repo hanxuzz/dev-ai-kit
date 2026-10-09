@@ -22,6 +22,7 @@
 
 ## 技能路由
 
+开发请求先经 flow-entry 将开始、继续、变更、检查交付映射为操作；不要让用户选技能或填写状态。明确请求已包含范围与执行授权时记录原始依据，不重复询问。
 登记与接管→flow-intake；来源→flow-meeting/flow-sources；范围与影响→flow-impact；任务→flow-plan；实施→flow-implement；验证→flow-test；进度→flow-next；变更→flow-change；交接→flow-handoff；规范→flow-conventions；提交→flow-git；凭证→flow-bitwarden。
 只解释代码或回答问题时直接处理，不强迫创建需求。
 
