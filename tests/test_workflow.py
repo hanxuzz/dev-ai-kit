@@ -31,6 +31,8 @@ class WorkspaceCase(unittest.TestCase):
         (self.repo / 'src/app.py').write_text('value = 1\n', encoding='utf-8')
         install(self.w, apply=True)
         self.p = read(self.w / 'project.yaml')
+        # Legacy workflow fixture; strict development gates are exercised in test_quality.py.
+        self.p['development'] = {'require_contract': False}
         self.p['conventions'].update(confirmed=True, branch={'mode': 'current', 'auto_create': False})
         self.p['runtime']['checks'] = {'unit': {'repo': 'ui', 'argv': [sys.executable, '-c', 'print("unit passed")'], 'cwd': '.', 'timeout_seconds': 5, 'requires': []}}
         atomic(self.w / 'project.yaml', self.p)

@@ -73,3 +73,7 @@ kit assist change --workspace <工作区> --expect <最新revision> --input <更
 ## 项目发现
 
 `discover --workspace <工作区> --area testing` 只读列出资料候选、项目事实过期及配置绑定差异。详情见 [项目上下文协议](project-context.md)。它不是自动执行命令的许可，也不代替 Agent 阅读、核实和应用配置。
+
+## 开发质量
+
+quality plan --target TASK-1 --expect N --input <依据.yaml> 保存实际调查的开发依据；quality inspect --target TASK-1 只读列出任务改动和审查缺口；quality review --target TASK-1 --expect N --input <报告.yaml> --by <实际审查者> 绑定当前代码记录双重审查。详见 [开发质量协议](development-quality.md)。

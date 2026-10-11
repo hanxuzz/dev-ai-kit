@@ -15,6 +15,7 @@ from .workspace import load, config_issues, git
 from .changes import analyze, material_snapshot, subject_fingerprint
 from .diagnostics import summarize, redact
 from .testing import environment, junit_results
+from .quality import contract_issues, review_issues, verification_issues
 
 ROLES = {'requirement': '04-requirement.md', 'impact': '05-impact.md', 'plan': '06-plan.md', 'testcases': '07-testcases.md'}
 STAGES = ('intake', 'meeting', 'sources', 'questions', 'requirement', 'impact', 'plan', 'build', 'test', 'done')
@@ -211,6 +212,7 @@ def definition_issues(w, project, directory, state):
             issues.append(f'检查 {name} 的仓库不存在')
     for task in tasks:
         tid = task['id']
+        issues.extend(contract_issues(w, project, directory, task))
         assigned.update(task.get('requirements', []))
         graph[tid] = task.get('depends_on', [])
         if not isinstance(graph[tid], list) or any(x not in task_ids or x == tid for x in graph[tid]):
@@ -426,6 +428,7 @@ def completion_issues(w, p, docs, d, s):
     problems = []
     for task in definitions(d, 'tasks'):
         tid = task['id']
+        problems.extend(review_issues(w, p, docs, d, s, task))
         if s.get('tasks', {}).get(tid, {}).get('status') != 'done':
             problems.append(f'任务 {tid} 未完成')
         for check in task.get('checks', []):
@@ -492,6 +495,9 @@ def mutate(workspace, req_id, expected, action, by='', note='', target='', value
                 raise KitError('前置任务未完成')
             entry = s.setdefault('tasks', {}).setdefault(target, {'status': 'pending'})
             if action == 'start':
+                problems = contract_issues(w, p, d, task, check_references=True)
+                if problems:
+                    raise KitError('；'.join(problems))
                 if entry['status'] == 'doing':
                     raise KitError('任务已在进行中；直接续接，不重置修改前快照')
                 if entry['status'] == 'done':
@@ -514,6 +520,9 @@ def mutate(workspace, req_id, expected, action, by='', note='', target='', value
                         raise KitError(f'检查 {check} 缺少当前代码的通过证据')
                 if task.get('manual_acceptance') and not valid_evidence(w, p, docs, d, s, 'task', target, task['repo']):
                     raise KitError('缺少本次人工验收证据')
+                problems = review_issues(w, p, docs, d, s, task) + verification_issues(w, p, docs, d, s, task)
+                if problems:
+                    raise KitError('；'.join(problems))
                 entry.update(status='done', finished_at=now())
                 if all(s['tasks'].get(t['id'], {}).get('status') == 'done' for t in definitions(d, 'tasks')):
                     s['stage'] = 'test'
@@ -684,6 +693,10 @@ def next_step(workspace, req_id=None):
         if not available:
             return answer('blocked', '没有可执行任务；检查依赖状态')
         task = available[0]
+        if not doing:
+            problems = contract_issues(w, p, d, task, check_references=True)
+            if problems:
+                return answer('prepare', '项目实现依据已变化，先核对再开始任务', problems)
         problems = branch_issues(w, p, task['repo'], s['id'])
         if problems:
             return answer('conventions', '先满足已确认的仓库规范', problems)

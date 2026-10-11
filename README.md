@@ -9,6 +9,7 @@
 套件只维护通用流程与规范。Agent 必须主动收集、核实项目独有信息并应用到配置和任务，持续追踪来源变化；不预设项目技术栈、启动命令或测试框架。
 
 - 项目发现与适配：[docs/project-context.md](docs/project-context.md)
+- 开发行为与代码质量闭环：[docs/development-quality.md](docs/development-quality.md)
 - 使用入口：[开始.md](开始.md)
 - 开发者日常使用：[MANUAL.md](MANUAL.md)
 - 安装、升级、恢复：[docs/runtime.md](docs/runtime.md)

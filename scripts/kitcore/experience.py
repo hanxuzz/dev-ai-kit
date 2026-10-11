@@ -4,7 +4,7 @@ import re
 from .storage import KitError, read, inside, digest, atomic
 from .workspace import load
 from .workflow import (adopt, prepare, mutate, next_step, context, definitions, code_snapshot,
-                       latest_evidence, fingerprint, approval_current, state_lock, persist)
+                       latest_evidence, fingerprint, approval_current, state_lock, persist, issues_for)
 from .changes import analyze
 from .testing import environment
 
@@ -54,6 +54,8 @@ def resume(workspace, req_id=None):
                     reason = 'current' if valid_evidence(w, p, docs, d, s, 'check', check, spec['repo']) else 'scope-changed'
         result['verification'].append({'check': check, 'state': reason, 'diagnostic': e.get('diagnostic') if e else None,
                                        'next_action': '无需重跑' if reason == 'current' else f'诊断后运行检查 {check}' if reason == 'failed' else f'运行检查 {check}'})
+    from .quality import required, review_issues
+    result['development_quality'] = [{'task': t['id'], 'required': required(p, t), 'issues': review_issues(w, p, docs, d, s, t)} for t in tasks]
     result['cases'] = []
     for case in definitions(d, 'cases'):
         e = latest_evidence(d, 'check', case.get('check')) if case.get('kind') == 'auto' else latest_evidence(d, 'case', case['id'])
@@ -110,18 +112,20 @@ def begin(workspace, req_id, request='', repo='', files=(), checks=(), acceptanc
                             'requirements.yaml': {'requirements': [{'id': 'R1', 'title': request, 'acceptance': acceptance, 'sources': ['S1']}], 'out_of_scope': [out_of_scope]},
                             'tasks.yaml': {'tasks': [{'id': 'TASK-1', 'title': request, 'repo': repo, 'requirements': ['R1'], 'files': list(files), 'checks': list(checks), 'depends_on': []}]},
                             'cases.yaml': {'cases': [{'id': f'T{i+1}', 'requirements': ['R1'], 'repo': repo, 'kind': 'auto', 'check': c, 'expected': acceptance} for i, c in enumerate(checks)]}}}
+    if by and authorization_note:
+        bundle['state']['sources']['S1']['execution_request'] = {'by': by, 'note': authorization_note}
     if manual_acceptance:
         bundle['artifacts']['tasks.yaml']['tasks'][0]['manual_acceptance'] = manual_acceptance
         bundle['artifacts']['cases.yaml']['cases'].append({'id': 'T-manual', 'requirements': ['R1'], 'repo': repo, 'kind': 'manual', 'expected': manual_acceptance})
     prepare(w, req_id, state['revision'], bundle)
-    if by and authorization_note:
+    if by and authorization_note and not issues_for(w, req_id, ready=True):
         current = read(target / 'status.yaml')
         mutate(w, req_id, current['revision'], 'confirm', by=by, note=authorization_note)
         with state_lock(w):
             current = read(target / 'status.yaml')
             current['execution_authorization'] = {'by': by, 'note': authorization_note, 'fingerprint': fingerprint(target, current), 'tasks': ['TASK-1']}
             persist(target, current, current['revision'], 'execution-authorization', {'by': by, 'note': authorization_note})
-    return {**summary, 'result': resume(w, req_id), 'next_action': 'Agent 在已有执行授权范围内开始任务；没有执行授权时仅汇报准备结果'}
+    return {**summary, 'result': resume(w, req_id), 'next_action': '先补齐项目开发依据与门禁；明确原始请求可继续作为确认/执行依据，无需重复询问，缺少授权时仅汇报准备结果'}
 
 
 def change(workspace, req_id, expected, bundle, apply=False):

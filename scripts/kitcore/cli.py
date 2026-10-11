@@ -8,6 +8,7 @@ import sys
 from . import VERSION
 from . import experience
 from . import testing
+from . import quality
 from .discovery import discover, AREAS
 from .storage import KitError, read
 from .workspace import KIT, install, rollback, load, config_issues
@@ -57,6 +58,14 @@ def parser():
     c.add_argument('--input')
     c.add_argument('--expect', type=int)
     c.add_argument('--apply', action='store_true')
+    c = sub.add_parser('quality', help='开发依据、实际差异检查与需求/项目适配审查')
+    c.add_argument('action', choices=('plan', 'inspect', 'review'))
+    c.add_argument('--workspace', required=True)
+    c.add_argument('--id')
+    c.add_argument('--target', required=True)
+    c.add_argument('--expect', type=int)
+    c.add_argument('--input')
+    c.add_argument('--by', default='')
     c = sub.add_parser('discover', help='只读发现项目资料、过期事实和配置绑定差异')
     c.add_argument('--workspace', required=True)
     c.add_argument('--area', choices=AREAS, default='overview')
@@ -114,7 +123,15 @@ def main(argv=None):
     args = parser().parse_args(argv)
     try:
         command = args.command
-        if command == 'discover':
+        if command == 'quality':
+            if args.action == 'inspect':
+                result = quality.inspect(args.workspace, args.id, args.target)
+            else:
+                if args.expect is None or not args.input:
+                    raise KitError('quality plan/review 需要最新 --expect 与 --input')
+                payload = read(args.input)
+                result = quality.plan(args.workspace, args.id, args.target, args.expect, payload) if args.action == 'plan' else quality.review(args.workspace, args.id, args.target, args.expect, payload, args.by)
+        elif command == 'discover':
             result = discover(args.workspace, args.area)
         elif command == 'cases':
             if args.action == 'draft':

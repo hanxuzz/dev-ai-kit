@@ -17,3 +17,5 @@ description: 将开发者开始、继续、变更和检查交付的自然语言�
 命令参数见 [Agent 参考](../../docs/cli-reference.md)。profile 自动推荐只是启发式，必须核对实际业务风险和检查覆盖，不能用关键词代替判断。默认回复当前结果、缺口和下一步，不输出内部状态表。
 
 生成/导入测试用例、启动本地或连接 dev 测试时，转 [flow-testing](../flow-testing/SKILL.md)：主动解析用户原件并按统一规范导入，不要求用户先转格式。
+
+开发实施必须走 flow-plan/flow-implement 的行为与项目实现依据，并在 finish 前执行 [flow-code-review](../flow-code-review/SKILL.md)。quick 也需要实际参考及回归依据，但记录可简短；不要让用户为内部步骤反复确认。

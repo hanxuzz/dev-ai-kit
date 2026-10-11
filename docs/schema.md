@@ -141,3 +141,7 @@ prepare 写材料前使确认失效，写完再保存新摘要；一次命令可
 ## 测试用例与环境扩展
 
 cases 支持 title/steps/preconditions/test_data/source_location/external_id/origin/review_status/test_name。新导入用例必须显式审阅，auto 用精确 classname::name 对应 JUnit。checks 可增加 report: junit 和 environment，runtime.environments 保存 local/dev 目标及部署版本，不保存凭证值。详细规范见 [测试接入](test-automation.md)。状态 schema 仍为 2，旧命令级检查保持兼容。
+
+## 开发质量检查
+
+项目 development.require_contract 为布尔值，新安装为 true。任务 development 保存行为、参考实现、复用/影响及回归映射；quality plan 绑定参考摘要，quality review 记录实际审查。状态任务 quality_review 由核心维护，绑定当前代码和依据；finish/complete 检查其时效。兼容及格式见 [开发质量协议](development-quality.md)。

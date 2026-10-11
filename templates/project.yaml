@@ -8,6 +8,9 @@ docs:
   mode: local
   path: docs
   requirements_dir: requirements
+development:
+  # Agent 收集开发依据并审查实际差异；用户无需填写内部记录。
+  require_contract: true
 runtime:
   # 检查按需执行。没有 database 依赖的单元测试不要求连接数据库。
   checks: {}
