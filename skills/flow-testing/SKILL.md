@@ -38,3 +38,7 @@ dev 先核实明确目标、实际部署版本、账号与测试数据范围，�
 配置 checks 的 environment、report: junit，测试框架读取 KIT_BASE_URL、KIT_ENVIRONMENT_KIND、KIT_JUNIT_PATH。使用 `run`；dev 已核实且获授权后传 --ready environment:<名称>。每次用返回 revision，不并行写同一需求。不要复用旧报告。
 
 先 assist review，再依次运行缺少证据的检查；报告通过、失败、跳过、缺失、歧义及人工未执行项。失败回到具体用例和实际代码，不删断言绕过。人工验收仍用 flow-test 记录真实观察。环境变化需重跑；用户接受交付后才 complete。截图、trace、原始报告可能含敏感信息，留本机且分享前检查。
+
+测试发现需修复的 Bug 时，必须按 [修复与续测协议](../../docs/test-automation.md#测试发现缺陷后的修复与续测) 暂停测试推进，保留失败现场，转 flow-implement/flow-code-review 按需求和项目规范修复；本地相关服务真实重启并确认新代码就绪后，先复测失败用例和受影响回归，再继续剩余测试。已有范围内修复授权不重复询问；dev 必须核实修复已部署才能续测。
+
+浏览器执行前读取 [效率与证据协议](../../docs/browser-testing.md)：复用隔离会话、读取局部页面状态、按条件等待、失效后重新定位；失败按停点复测，视频/trace 按需留证，不通过减少真实验收来提速。
