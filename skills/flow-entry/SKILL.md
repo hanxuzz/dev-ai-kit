@@ -19,3 +19,5 @@ description: 将开发者开始、继续、变更和检查交付的自然语言�
 生成/导入测试用例、启动本地或连接 dev 测试时，转 [flow-testing](../flow-testing/SKILL.md)：主动解析用户原件并按统一规范导入，不要求用户先转格式。
 
 开发实施必须走 flow-plan/flow-implement 的行为与项目实现依据，并在 finish 前执行 [flow-code-review](../flow-code-review/SKILL.md)。quick 也需要实际参考及回归依据，但记录可简短；不要让用户为内部步骤反复确认。
+
+每轮结束必须按 [进度反馈协议](../../docs/progress-feedback.md) 主动说明本轮结果、当前进度和下一步责任方。状态更新返回的 progress 可直接作为事实依据；需要用户决定时读实际问题/差异并具体提问，不让用户猜下一步。

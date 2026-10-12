@@ -206,4 +206,4 @@ def review(workspace, req_id, target, expected, report, by):
                                    'references': reference_snapshot(w, p, task.get('development', {})),
                                    'policy': digest(p.get('conventions', {}))}
         persist(d, s, expected, 'quality-review', {'target': target, 'by': by})
-        return {'task': target, 'revision': s['revision'], 'reviewed': True, 'note': '记录实际审查，不代表测试通过；finish 仍需验证证据'}
+        return {'id': s['id'], 'task': target, 'revision': s['revision'], 'reviewed': True, 'note': '记录实际审查，不代表测试通过；finish 仍需验证证据'}

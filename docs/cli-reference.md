@@ -77,3 +77,7 @@ kit assist change --workspace <工作区> --expect <最新revision> --input <更
 ## 开发质量
 
 quality plan --target TASK-1 --expect N --input <依据.yaml> 保存实际调查的开发依据；quality inspect --target TASK-1 只读列出任务改动和审查缺口；quality review --target TASK-1 --expect N --input <报告.yaml> --by <实际审查者> 绑定当前代码记录双重审查。详见 [开发质量协议](development-quality.md)。
+
+## 默认进度摘要
+
+状态更新和测试执行等命令返回 progress，next/status 与 assist resume/review 也提供同一摘要。它只描述事实与下一步建议，不授权执行。写入成功但摘要不可读时返回 progress.available=false，不能重复写入；见 [进度反馈协议](progress-feedback.md)。

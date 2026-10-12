@@ -654,7 +654,7 @@ def run_check(workspace, req_id, check_id, expected, ready=(), diagnostic_log=Fa
              'code': before, 'fingerprint': fp, 'subject_fingerprint': subject_fingerprint(d, current, 'check', check_id), 'check_hash': digest(check), 'output_sha256': output_hash.hexdigest(), 'output_bytes': byte_count, 'diagnostic': diagnostic, 'environment': env_snapshot, 'case_results': report['cases'] if report else {}, 'report': report}
         atomic(d / '.kit/evidence' / (e['id'] + '.yaml'), e)
         persist(d, current, expected, 'check', {'id': check_id, 'result': result, 'evidence': e['id']})
-    return {**e, 'revision': current['revision'], 'local_diagnostic_log': str(log_path) if log_path else None}
+    return {**e, 'requirement_id': req_id, 'revision': current['revision'], 'local_diagnostic_log': str(log_path) if log_path else None}
 
 
 def next_step(workspace, req_id=None):

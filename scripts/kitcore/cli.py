@@ -194,6 +194,24 @@ def main(argv=None):
             result = run_check(args.workspace, args.id, args.check, args.expect, args.ready, args.diagnostic_log)
         else:
             result = mutate(args.workspace, args.id, args.expect, command, by=getattr(args, 'by', ''), note=getattr(args, 'note', ''), target=getattr(args, 'target', ''), value=getattr(args, 'result', ''))
+        # Every state-changing workflow command returns a fresh summary for the Agent to report.
+        # A summary failure must never disguise a successful write or invite repeating a command.
+        summary_commands = {'adopt', 'select', 'prepare', 'confirm', 'change', 'block', 'start', 'finish', 'manual', 'complete', 'run', 'quality', 'cases', 'next', 'status'}
+        applied = command not in ('adopt', 'cases') or getattr(args, 'apply', False)
+        include_summary = command in summary_commands and applied and not (command == 'quality' and args.action == 'inspect')
+        if command == 'assist' and args.intent in ('begin', 'change') and args.apply:
+            include_summary = True
+        if command in ('install', 'upgrade') and args.apply:
+            include_summary = True
+        if include_summary:
+            selected = (result.get('id') or result.get('current') or getattr(args, 'id', None)) if command != 'run' else getattr(args, 'id', None)
+            if command == 'run':
+                selected = result.get('requirement_id', selected)
+            try:
+                result['progress'] = experience.resume(args.workspace, selected)['progress']
+            except (KitError, OSError, TypeError, KeyError, ValueError, AttributeError):
+                result['progress'] = {'available': False, 'reason': '本次操作结果已返回，但进度摘要暂不可读；不要重复执行写入',
+                                      'next': {'owner': 'agent', 'action': '重新读取状态，定位材料或配置缺口后恢复摘要'}}
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 1 if result.get('ok') is False or result.get('missing') or result.get('result') == 'failed' else 0
     except KitError as error:

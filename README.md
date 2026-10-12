@@ -10,6 +10,7 @@
 
 - 项目发现与适配：[docs/project-context.md](docs/project-context.md)
 - 开发行为与代码质量闭环：[docs/development-quality.md](docs/development-quality.md)
+- 默认进度与下一步反馈：[docs/progress-feedback.md](docs/progress-feedback.md)
 - 使用入口：[开始.md](开始.md)
 - 开发者日常使用：[MANUAL.md](MANUAL.md)
 - 安装、升级、恢复：[docs/runtime.md](docs/runtime.md)

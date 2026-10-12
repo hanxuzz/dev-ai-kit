@@ -7,6 +7,7 @@ from .workflow import (adopt, prepare, mutate, next_step, context, definitions, 
                        latest_evidence, fingerprint, approval_current, state_lock, persist, issues_for)
 from .changes import analyze
 from .testing import environment
+from .progress import summarize
 
 
 def recommend_profile(request, files, risks):
@@ -23,10 +24,12 @@ def resume(workspace, req_id=None):
               'needs_decision': [], 'next_action': flow.get('action'), 'details': flow.get('details', [])}
     if flow.get('phase') in ('select', 'adopt'):
         result['requirements'] = flow.get('requirements', [])
+        result['progress'] = summarize(result)
         return result
     w, p, local, docs, d, s = context(workspace, req_id)
     result.update(id=s['id'], title=s.get('title'), revision=s.get('revision'), handoff=s.get('handoff', {}))
     tasks = definitions(d, 'tasks')
+    scope_approved = approval_current(d, s)
     result['completed'] = [t['title'] for t in tasks if s.get('tasks', {}).get(t['id'], {}).get('status') == 'done']
     result['in_progress'] = []
     for task in tasks:
@@ -51,16 +54,21 @@ def resume(workspace, req_id=None):
                 if e.get('result') != 'passed':
                     reason = 'failed'
                 else:
-                    reason = 'current' if valid_evidence(w, p, docs, d, s, 'check', check, spec['repo']) else 'scope-changed'
+                    reason = 'current' if scope_approved and valid_evidence(w, p, docs, d, s, 'check', check, spec['repo']) else 'scope-changed'
         result['verification'].append({'check': check, 'state': reason, 'diagnostic': e.get('diagnostic') if e else None,
                                        'next_action': '无需重跑' if reason == 'current' else f'诊断后运行检查 {check}' if reason == 'failed' else f'运行检查 {check}'})
     from .quality import required, review_issues
-    result['development_quality'] = [{'task': t['id'], 'required': required(p, t), 'issues': review_issues(w, p, docs, d, s, t)} for t in tasks]
+    result['development_quality'] = [{'task': t['id'], 'required': required(p, t), 'issues': review_issues(w, p, docs, d, s, t) + ([] if scope_approved else ['当前范围尚待确认'])} for t in tasks]
     result['cases'] = []
+    from .workflow import valid_evidence
     for case in definitions(d, 'cases'):
-        e = latest_evidence(d, 'check', case.get('check')) if case.get('kind') == 'auto' else latest_evidence(d, 'case', case['id'])
+        kind = 'check' if case.get('kind') == 'auto' else 'case'
+        target = case.get('check') if kind == 'check' else case['id']
+        e = latest_evidence(d, kind, target)
+        last_result = ((e.get('case_results', {}).get(case['id'], 'not-mapped') if case.get('test_name') else e.get('result')) if e else 'not-run')
+        current = scope_approved and case.get('review_status', 'reviewed') == 'reviewed' and last_result == 'passed' and valid_evidence(w, p, docs, d, s, kind, target, case['repo'])
         result['cases'].append({'id': case['id'], 'review_status': case.get('review_status', 'reviewed'),
-                                'kind': case['kind'], 'last_result': (e.get('case_results', {}).get(case['id'], 'not-mapped') if case.get('test_name') else e.get('result')) if e else 'not-run'})
+                                'kind': case['kind'], 'last_result': last_result, 'current_passed': current})
     delta = s.get('pending_change')
     if flow['phase'] == 'confirm':
         result['needs_decision'] = [{'question': '确认以下变化是否纳入本次范围', 'changes': delta or {'reason': '尚无当前版本的范围确认'}, 'preserved_tasks': delta.get('preserved_tasks', []) if delta else []}]
@@ -72,6 +80,8 @@ def resume(workspace, req_id=None):
     if authorization:
         authorization['valid_for_current_scope'] = authorization.get('fingerprint') == fingerprint(d, s) and approval_current(d, s)
     result['authorization'] = authorization
+    task_states = [{'status': s.get('tasks', {}).get(t['id'], {}).get('status', 'pending')} for t in tasks]
+    result['progress'] = summarize(result, task_states, s.get('history', []))
     return result
 
 

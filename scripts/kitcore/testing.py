@@ -159,7 +159,7 @@ def import_cases(workspace, req_id, path, expected=None, source='qa', reviewed_b
         merged[c['id']] = c
     bundle = {'artifacts': {'cases.yaml': {**existing, 'cases': list(merged.values())}}}
     delta = analyze(d, s, bundle)
-    result = {'mutates': apply, 'imported': sorted(ids), 'review_status': 'reviewed' if reviewed_by.strip() else 'draft', 'delta': delta}
+    result = {'id': s['id'], 'mutates': apply, 'imported': sorted(ids), 'review_status': 'reviewed' if reviewed_by.strip() else 'draft', 'delta': delta}
     if apply:
         result['update'] = prepare(w, s['id'], expected, bundle)
     else:
