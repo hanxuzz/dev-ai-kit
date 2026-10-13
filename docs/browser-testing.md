@@ -35,3 +35,5 @@ trace/视频可含请求、账号、个人信息，默认本机受控目录，�
 2026-10-12 核对：[Playwright CLI + Skills](https://github.com/microsoft/playwright-cli)、[Playwright MCP](https://github.com/microsoft/playwright-mcp)、[定位](https://playwright.dev/docs/locators)、[自动等待](https://playwright.dev/docs/actionability)、[trace](https://playwright.dev/docs/trace-viewer)、[录像](https://playwright.dev/docs/videos)、[agent-browser 差异](https://agent-browser.dev/diffing)。能力需以本机版本核实，不能假定所有工具都有同名命令。
 
 本协议不承诺固定提速比例。在业务项目对相同用例记录用时、工具调用次数、失败重试和覆盖结果，再判断是否更快；缺少真实运行不能声称性能已验证。
+
+跨轮次执行方法与证据复用按 [测试复用协议](test-reuse.md) 处理，记录落在业务项目，不能把旧结果冒充本轮执行。

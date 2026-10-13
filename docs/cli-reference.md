@@ -81,3 +81,7 @@ quality plan --target TASK-1 --expect N --input <依据.yaml> 保存实际调查
 ## 默认进度摘要
 
 状态更新和测试执行等命令返回 progress，next/status 与 assist resume/review 也提供同一摘要。它只描述事实与下一步建议，不授权执行。写入成功但摘要不可读时返回 progress.available=false，不能重复写入；见 [进度反馈协议](progress-feedback.md)。
+
+`assist resume/review` 的 `diagnostics` 返回本次只读观察耗时（observation_ms）、快照读取次数（snapshot_reads）和复用次数（snapshot_reuses）。缓存仅在单次观察期间存在，不跳过实际测试或状态写入校验。
+
+`test-report --workspace <工作区> [--id <需求>] --since <带时区ISO时间> [--apply]`：按指定区间预览或保存独立 Markdown 测试报告，返回 markdown/counts/path（保存时）。不执行测试、不改变需求状态。字段与补充说明见 [报告协议](test-report.md)。

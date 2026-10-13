@@ -1,10 +1,11 @@
 """Developer-facing intent entrypoints; execution and confirmation remain explicit."""
 import copy
 import re
+from time import perf_counter
 from .storage import KitError, read, inside, digest, atomic
 from .workspace import load
 from .workflow import (adopt, prepare, mutate, next_step, context, definitions, code_snapshot,
-                       latest_evidence, fingerprint, approval_current, state_lock, persist, issues_for)
+                       latest_evidence, fingerprint, approval_current, state_lock, persist, issues_for, snapshot_observation)
 from .changes import analyze
 from .testing import environment
 from .progress import summarize
@@ -19,6 +20,16 @@ def recommend_profile(request, files, risks):
 
 
 def resume(workspace, req_id=None):
+    started = perf_counter()
+    with snapshot_observation() as cache:
+        result = _resume(workspace, req_id)
+    result['diagnostics'] = {'observation_ms': round((perf_counter() - started) * 1000, 2),
+                             'snapshot_reads': cache['misses'], 'snapshot_reuses': cache['hits'],
+                             'cache_scope': 'single_readonly_observation'}
+    return result
+
+
+def _resume(workspace, req_id=None):
     flow = next_step(workspace, req_id)
     result = {'summary': flow.get('action'), 'phase': flow.get('phase'), 'mutates': False,
               'needs_decision': [], 'next_action': flow.get('action'), 'details': flow.get('details', [])}

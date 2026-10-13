@@ -1,5 +1,6 @@
 """Workflow state, approval snapshots, task dependencies and verification evidence."""
 import copy
+from contextvars import ContextVar
 from contextlib import contextmanager
 import fnmatch
 import os
@@ -126,7 +127,21 @@ def repo_path(w, project, name):
     return inside(w, value['path'] if isinstance(value, dict) else value)
 
 
-def code_files(w, project, docs, repo):
+_snapshot_cache = ContextVar('readonly_snapshot_cache', default=None)
+
+
+@contextmanager
+def snapshot_observation():
+    """One read-only observation; never wrap mutations or test execution."""
+    cache = {'snapshots': {}, 'hits': 0, 'misses': 0}
+    token = _snapshot_cache.set(cache)
+    try:
+        yield cache
+    finally:
+        _snapshot_cache.reset(token)
+
+
+def code_files(w, project, docs, repo, inputs=None):
     path = repo_path(w, project, repo)
     try:
         proc = subprocess.run(['git', '-C', str(path), 'ls-files', '-co', '--exclude-standard', '-z', '--', '.'], capture_output=True, timeout=20)
@@ -139,6 +154,8 @@ def code_files(w, project, docs, repo):
         if not raw:
             continue
         name = os.fsdecode(raw)
+        if inputs is not None and not any(fnmatch.fnmatchcase(name, pattern) for pattern in inputs):
+            continue
         target = path / name
         resolved = target.resolve()
         if docs == resolved or docs in resolved.parents or any(x in name.split('/') for x in ('.dev-ai-kit', '.git', '__pycache__', '.venv')) or name in ('project.yaml', 'project.local.yaml', '.dev-ai-kit.lock', '.cursor/next-step.txt'):
@@ -151,12 +168,20 @@ def code_files(w, project, docs, repo):
 
 
 def code_snapshot(w, project, docs, repo, inputs=None):
-    files = code_files(w, project, docs, repo)
     if inputs is not None:
         if not isinstance(inputs, list) or not inputs or any(not isinstance(x, str) or not x or x.startswith('/') or '..' in x.split('/') for x in inputs):
             raise KitError('inputs 必须是非空相对路径/glob 列表；遗漏依赖会降低验证可信度')
-        files = {name: value for name, value in files.items() if any(fnmatch.fnmatchcase(name, pattern) for pattern in inputs)}
-    return {'head': git(repo_path(w, project, repo), 'rev-parse', 'HEAD'), 'tree': digest(files)}
+    cache = _snapshot_cache.get()
+    key = (str(repo_path(w, project, repo).resolve()), str(docs.resolve()), tuple(inputs) if inputs is not None else None)
+    if cache is not None and key in cache['snapshots']:
+        cache['hits'] += 1
+        return dict(cache['snapshots'][key])
+    files = code_files(w, project, docs, repo, inputs)
+    result = {'head': git(repo_path(w, project, repo), 'rev-parse', 'HEAD'), 'tree': digest(files)}
+    if cache is not None:
+        cache['misses'] += 1
+        cache['snapshots'][key] = result
+    return dict(result)
 
 
 def definition_issues(w, project, directory, state):

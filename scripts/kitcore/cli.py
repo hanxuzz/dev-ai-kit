@@ -81,6 +81,11 @@ def parser():
     c.add_argument('--replace', action='store_true')
     c.add_argument('--expect', type=int)
     c.add_argument('--apply', action='store_true')
+    c = sub.add_parser('test-report', help='按本轮时间区间生成 Markdown 测试报告，不改变验收状态')
+    c.add_argument('--workspace', required=True)
+    c.add_argument('--id')
+    c.add_argument('--since', required=True, help='本轮测试开始前记录的带时区 ISO 时间')
+    c.add_argument('--apply', action='store_true', help='保存独立报告；默认只预览')
     c = sub.add_parser('rollback')
     c.add_argument('--workspace', required=True)
     c.add_argument('--backup', required=True)
@@ -123,7 +128,10 @@ def main(argv=None):
     args = parser().parse_args(argv)
     try:
         command = args.command
-        if command == 'quality':
+        if command == 'test-report':
+            from .reporting import report
+            result = report(args.workspace, args.id, args.since, args.apply)
+        elif command == 'quality':
             if args.action == 'inspect':
                 result = quality.inspect(args.workspace, args.id, args.target)
             else:

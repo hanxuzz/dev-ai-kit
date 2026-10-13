@@ -20,6 +20,8 @@
 - 测试生成、任意原件规范化与本地/dev 执行：[docs/test-automation.md](docs/test-automation.md)
 - 浏览器执行与录像取证：[docs/browser-testing.md](docs/browser-testing.md)
 - 需求录屏解析：[docs/recording-analysis.md](docs/recording-analysis.md)
+- 测试方法复用与增量验证：[docs/test-reuse.md](docs/test-reuse.md)
+- 测试文字报告：[docs/test-report.md](docs/test-report.md)
 - 分层测试：[docs/testing.md](docs/testing.md)
 - 本轮取舍与限制：[docs/decisions-0.3.md](docs/decisions-0.3.md)
 - 已实现与后续验证：[PLAN.md](PLAN.md)
