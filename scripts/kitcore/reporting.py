@@ -81,8 +81,14 @@ def report(workspace, req_id, since, apply=False):
         if not events: lines+=['','本轮没有已登记执行证据；不得据此声称测试通过。']
         lines+=['','## 待处理与下一步','',cell(snapshot['progress']['reason']),cell(snapshot['progress']['next']['action'])]
         lines += ['- '+cell(v) for v in snapshot.get('details',[])]
-        lines+=['','## 实际观察与修复说明（Agent 补充）','',
-                '尚未补充。请按本轮实际工具调用补充浏览器页面/操作、实际结果、缺陷与修复、重启就绪、复测范围、未执行原因，以及本机截图/录像引用。不从 passed 推断这些动作发生，不复制原始日志、令牌或客户数据。','']
+        lines+=['','## 本轮模式与授权（Agent 补充）','',
+                '默认仅测试。请补充测试开始前是否明确获准遇错修复及真实依据；机器证据不能证明修复授权。',
+                '', '## 问题分析与录像定位（Agent 补充）', '',
+                '| 问题/用例 | 预期与实际/复现 | 影响 | 已验证原因/待验证推测 | 录像文件与本段时间点 | 跳过/阻塞/停止及理由 | 后续建议 |',
+                '|---|---|---|---|---|---|---|',
+                '', '尚未补充，不表示没有问题。未录屏写未开启；时间点需核对或标约略。默认仅记录与分析，不执行修复建议。',
+                '', '## 实际观察与修复说明（Agent 补充）','',
+                '尚未补充。仅在测试前明确授权修复的轮次记录实际修复；请按本轮实际工具调用补充浏览器页面/操作、实际结果、缺陷与修复、重启就绪、复测范围、未执行原因，以及本机截图/录像引用。不从 passed 推断这些动作发生，不复制原始日志、令牌或客户数据。','']
         markdown='\n'.join(lines)
         result={'id':s['id'],'revision':s['revision'],'since':since,'through':end,'counts':counts,'mutates':apply,'markdown':markdown}
         if apply:

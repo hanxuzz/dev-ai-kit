@@ -45,7 +45,7 @@ def summarize(snapshot, task_states=(), history=()):
     owner, action, reply = actions[phase]
     failed_checks = [c['check'] for c in checks if c['state'] == 'failed']
     if phase in ('build', 'test') and failed_checks:
-        action = '先诊断失败检查：' + '、'.join(failed_checks) + '；修复后重跑，再核对剩余工作。'
+        action = '记录并分析失败检查：' + '、'.join(failed_checks) + '；默认安全跳过后继续独立测试，无法继续则停止并出报告；仅测试前明确授权修复才修复复测。'
     elif phase == 'build' and snapshot.get('in_progress') and checks and current_checks == len(checks):
         action = '当前检查已通过；核对实际差异、需求及回归覆盖，补齐代码审查后登记任务完成。'
     summary = f"{LABELS[phase]}；任务已完成 {counts['done']}/{counts['total']}" if counts['total'] else f'{LABELS[phase]}；尚未形成任务计划'

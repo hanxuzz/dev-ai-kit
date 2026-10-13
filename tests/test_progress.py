@@ -85,7 +85,7 @@ class ProgressTests(unittest.TestCase):
         atomic(self.w/'project.yaml',self.p)
         self.ready(); self.mutate('start',target='TASK-1'); self.run_unit()
         p=resume(self.w)['progress']
-        self.assertIn('诊断失败检查',p['next']['action'])
+        self.assertIn('记录并分析失败检查',p['next']['action'])
         self.assertEqual(p['verification_gaps'][0]['state'],'failed')
 
     def test_summary_failure_does_not_report_successful_write_as_failed(self):
