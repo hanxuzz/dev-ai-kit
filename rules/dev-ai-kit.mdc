@@ -30,3 +30,5 @@ questions=open、当前 blocker 或失效确认时，不改对应业务范围。
 测试发现需修复的 Bug 时按 docs/test-automation.md 的修复与续测协议暂停测试推进，保留现场，按原需求、项目规范、复用及审查要求修复；本地相关服务真实重启并确认新代码就绪后，先复测失败用例和回归，再续测。已有授权内自主完成闭环，不把失败跳过；dev 未部署修复版本时不能声称已修复通过。
 
 浏览器验证按 docs/browser-testing.md 复用适当会话、局部观察、条件等待和按需取证；录屏需求解析按 skills/flow-meeting/SKILL.md 及 docs/recording-analysis.md 联合核对语音画面、覆盖范围和原时间来源。不得用稀疏抽样声称完整观看或把转写直接当确认需求。
+
+Git 授权按 docs/trust.md：禁止的是未要求时擅自 push，不是禁止 Agent 代推送。用户明确要求 push/推送且目标范围清楚时直接执行，不重复索要授权；仅要求 commit 不自动 push。“提交上去/提上去”按上下文包含本次修改的必要提交与推送。

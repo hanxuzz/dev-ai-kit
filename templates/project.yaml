@@ -43,6 +43,7 @@ conventions:
     only_when_asked: true
     allow_on_base: false
   push:
+    # 明确要求 push 时由 Agent 执行；true 是禁止擅自推送，不是禁止代推送。
     only_when_asked: true
   trailer:
     coauthor: false

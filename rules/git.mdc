@@ -3,7 +3,7 @@ description: 套件默认 Git 约束；项目现有更严规则仍有效
 alwaysApply: true
 ---
 
-提交和推送分别需要用户明确要求。不要 force push、绕过钩子或修改 Git 配置。
+未要求时不擅自提交或推送；用户明确说 push/推送就是授权 Agent 代为执行，不重复确认。“提交上去/提上去”在上下文明确指本次修改送到远端时包含必要 commit 和 push；仅 commit 不包含 push。不要 force push、绕过钩子或修改 Git 配置。
 不要提交凭证、本机 project.local.yaml、转写过程、未授权原件；仅选择本次相关文件。
 分支按项目已确认的 mode/allowed_pattern/base/pattern 判断；auto_create 只表示是否允许代操作，不表示当前分支一定正确。
 用户只要求完成任务不等于允许提交、推送或部署。
