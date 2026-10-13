@@ -144,7 +144,7 @@ def change(workspace, req_id, expected, bundle, apply=False):
         raise KitError('revision 冲突；读取最新状态后重新比较')
     delta = analyze(directory, state, bundle)
     result = {'id': state['id'], 'revision': expected, 'delta': delta, 'mutates': apply,
-              'question': '只需确认新增或改变的范围，不重复确认已保留工作' if delta['confirmation_required'] else None}
+              'question': '先展示原要求及来源、新请求和影响；等待用户针对差异二次明确确认，不将首次变更请求当确认，不重复确认保留工作' if delta['confirmation_required'] else None}
     if apply:
         result['update'] = prepare(w, state['id'], expected, bundle)
         result['next'] = resume(w, state['id'])

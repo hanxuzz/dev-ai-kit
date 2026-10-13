@@ -34,7 +34,7 @@ def summarize(snapshot, task_states=(), history=()):
         'adopt': ('agent_then_user', '先核对已有规格与计划，说明接管范围；需要接管授权时再写入。', '接管这条需求，保留原材料。'),
         'prepare': ('agent', '先根据已有代码和资料补齐缺口，无法查清的业务决定再询问。', None),
         'questions': ('user', '回答 Agent 列出的具体业务问题，再继续受影响的工作。', None),
-        'confirm': ('agent_then_user', '对照原始请求核对变化，只将尚未授权的业务决定交给你确认。', None),
+        'confirm': ('agent_then_user', '核对原始依据；若改变已确认需求，展示新旧差异和影响，等待用户二次明确确认后再修改。', None),
         'conventions': ('agent', '核对既有项目规范和分支；只有存在真实冲突才请你选择。', None),
         'build': ('agent', snapshot.get('next_action', '继续当前任务'), '继续完成已确认范围内的任务。'),
         'blocked': ('agent', '先定位阻塞；需要账号、资料或业务决定时明确说明由谁提供。', None),
