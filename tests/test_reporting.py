@@ -58,6 +58,26 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(r['counts']['current_passed'],0)
         self.assertIn('未通过/已失效/待审阅',r['markdown'])
 
+    def test_source_trace_is_preserved_without_reading_or_copying_original(self):
+        self.ready()
+        path=self.d/'cases.yaml'
+        data=read(path)
+        case=data['cases'][0]
+        case['origin']={'type':'qa','external_id':'QA-42','file_sha256':'a'*64}
+        case['source_location']='Sheet 1 | row 7 <script>alert(1)</script>'
+        atomic(path,data)
+        before=path.read_bytes()
+        saved=report(self.w,None,'2000-01-01T00:00:00Z',True)
+        self.assertIn('QA-42',saved['markdown'])
+        self.assertIn('a'*64,saved['markdown'])
+        self.assertIn('Sheet 1 &#124; row 7 &lt;script&gt;',saved['markdown'])
+        self.assertNotIn('<script>',saved['markdown'])
+        self.assertEqual(before,path.read_bytes())
+        # The report cannot invent original files or browser media from a case definition.
+        files=list((self.d/'.kit/test-reports').iterdir())
+        self.assertEqual(len(files),1)
+        self.assertEqual(files[0].suffix,'.md')
+
     def test_cli_and_timestamp_validation(self):
         for value in ['invalid','2020-01-01T00:00:00','2999-01-01T00:00:00Z']:
             with self.assertRaises(KitError): report(self.w,None,value)

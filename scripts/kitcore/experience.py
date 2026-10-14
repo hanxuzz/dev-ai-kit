@@ -67,7 +67,7 @@ def _resume(workspace, req_id=None):
                 else:
                     reason = 'current' if scope_approved and valid_evidence(w, p, docs, d, s, 'check', check, spec['repo']) else 'scope-changed'
         result['verification'].append({'check': check, 'state': reason, 'diagnostic': e.get('diagnostic') if e else None,
-                                       'next_action': '无需重跑' if reason == 'current' else f'记录检查 {check} 失败并判断能否继续独立测试；修复须有测试前授权' if reason == 'failed' else f'运行检查 {check}'})
+                                       'next_action': '无需重跑' if reason == 'current' else f'记录检查 {check} 失败并判断能否继续独立测试；本轮不修复，报告后另开明确授权的修复轮' if reason == 'failed' else f'运行检查 {check}'})
     from .quality import required, review_issues
     result['development_quality'] = [{'task': t['id'], 'required': required(p, t), 'issues': review_issues(w, p, docs, d, s, t) + ([] if scope_approved else ['当前范围尚待确认'])} for t in tasks]
     result['cases'] = []
