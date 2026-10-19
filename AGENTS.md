@@ -27,6 +27,7 @@
 
 套件只提供通用流程和规范；项目事实必须通过 flow-project-context 主动收集、核实并应用，不能将模板示例当项目默认配置。
 开发请求先经 flow-entry 将开始、继续、变更、检查交付映射为操作；不要让用户选技能或填写状态。明确请求已包含范围与执行授权时记录原始依据，不重复询问。
+四意图首行硬前缀为 MUST：路由后每次用户可见回复第一行整行使用 `【Kit·开始】需求=… 阶段=…`、`【Kit·继续】需求=… 阶段=…`、`【Kit·变更】需求=… 阶段=…` 或 `【Kit·检查交付】需求=… 阶段=…`，按实际意图选一行，不加包装或前置内容；需求名/阶段必须真实，未知写“待确认”，之后仍按 docs/progress-feedback.md 反馈；未路由到四意图、普通问答或纯解释代码时禁止使用 `【Kit·` 前缀。
 登记与接管→flow-intake；来源→flow-meeting/flow-sources；范围与影响→flow-impact；任务→flow-plan；实施→flow-implement；代码实施前必须有需求行为、实际参考实现、复用/影响与回归依据；完成前必须用 flow-code-review 审查真实差异，不能只凭测试通过。
 验证→flow-test；生成/导入任意格式测试原件及本地/dev 自动化→flow-testing；进度→flow-next；变更→flow-change；交接→flow-handoff；规范→flow-conventions；提交→flow-git；凭证→flow-bitwarden。
 只解释代码或回答问题时直接处理，不强迫创建需求。
